@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Thanal Pain & Palliative Care Management System — standalone demonstration with fictional sample data.">
+<title>Thanal · Pain & Palliative Care Management (DEMO)</title>
+<style>
+/* THANAL · shadcn-style tokens + Lucide-style icons
+   STATUS LANGUAGE: green = good/complete/approved | blue = pending/in progress/info
+   red = critical/overdue/expired/rejected | grey = neutral/closed */
+:root{
+ --bg:0 0% 100%; --fg:222 47% 11%; --card:0 0% 100%; --muted:210 40% 96%;
+ --mutedfg:215 16% 47%; --border:214 32% 91%; --primary:221 83% 53%;
+ --primaryfg:210 40% 98%; --ring:221 83% 53%;
+ --success:142 72% 34%; --successbg:142 64% 95%; --successfg:142 72% 27%;
+ --info:217 82% 52%; --infobg:214 95% 95%; --infofg:217 82% 38%;
+ --danger:0 72% 51%; --dangerbg:0 86% 97%; --dangerfg:0 74% 40%;
+ --warn:24 90% 45%; --warnbg:32 95% 94%; --warnfg:24 85% 33%;
+ --neutral:215 16% 47%; --neutralbg:210 40% 96%; --neutralfg:215 16% 35%;
+ --radius:12px; --shadow:0 1px 2px hsl(222 47% 11%/.05),0 6px 20px hsl(222 47% 11%/.045)
+}
+:root[data-theme="dark"]{
+ --bg:222 47% 7%; --fg:210 40% 96%; --card:222 38% 11%; --muted:217 33% 16%;
+ --mutedfg:215 20% 65%; --border:217 33% 22%; --primary:217 91% 60%;
+ --primaryfg:222 47% 11%; --ring:217 91% 60%;
+ --success:142 69% 48%; --successbg:145 40% 16%; --successfg:142 70% 72%;
+ --info:213 94% 68%; --infobg:214 50% 18%; --infofg:213 94% 78%;
+ --danger:0 84% 62%; --dangerbg:0 40% 18%; --dangerfg:0 90% 78%;
+ --warn:35 92% 58%; --warnbg:28 45% 16%; --warnfg:35 95% 72%;
+ --neutral:215 20% 65%; --neutralbg:217 33% 18%; --neutralfg:215 20% 80%;
+ --shadow:0 1px 2px rgba(0,0,0,.5),0 8px 24px rgba(0,0,0,.3)
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{background:hsl(var(--bg));color:hsl(var(--fg));font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3,p{margin:0}a{color:hsl(var(--primary));text-decoration:none}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+.ic{width:20px;height:20px;flex:none}.ic.sm{width:17px;height:17px}.ic.lg{width:24px;height:24px}
+svg.ic{stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.muted{color:hsl(var(--mutedfg))}.tiny{font-size:11px}.mono{font-variant-numeric:tabular-nums}
+.row{display:flex;align-items:center;gap:8px}.row.wrap{flex-wrap:wrap}.sp{flex:1}
+.skip{position:absolute;left:-999px;top:0;background:hsl(var(--fg));color:hsl(var(--bg));padding:8px 12px;z-index:200}
+.skip:focus{left:8px;top:8px}
+/* demo banner */
+#banner{display:flex;align-items:center;gap:9px;justify-content:center;flex-wrap:wrap;padding:7px 14px;background:hsl(var(--warnbg));color:hsl(var(--warnfg));border-bottom:1px solid hsl(var(--warn)/.3);font-size:11.5px;font-weight:650;letter-spacing:.02em;text-align:center}
+/* login */
+#login{display:none;min-height:100vh;align-items:center;justify-content:center;padding:24px;background:radial-gradient(800px 420px at 12% -8%,hsl(var(--info)/.12),transparent),radial-gradient(700px 420px at 105% 105%,hsl(var(--success)/.10),transparent)}
+body:not(.in) #login{display:flex}
+.lc{width:100%;max-width:720px}.lhead{text-align:center;margin-bottom:20px}
+.lhead .logo{width:52px;height:52px;margin:0 auto 12px;border-radius:15px;background:linear-gradient(145deg,hsl(var(--success)),hsl(var(--info)));color:#fff;display:grid;place-items:center;box-shadow:0 8px 22px hsl(var(--success)/.25)}
+.lhead .logo .ic{width:28px;height:28px}
+.lhead h1{font-size:23px;letter-spacing:-.03em}.lhead p{color:hsl(var(--mutedfg));font-size:13px;margin-top:4px}
+.lgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.lrole{display:flex;gap:11px;align-items:center;text-align:left;background:hsl(var(--card));border:1px solid hsl(var(--border));border-radius:var(--radius);padding:12px;box-shadow:var(--shadow);transition:transform .15s,border-color .15s}
+.lrole:hover{transform:translateY(-2px);border-color:hsl(var(--primary))}
+.lrole .tile{width:42px;height:42px;border-radius:13px}.lrole .ic{width:42px;height:42px;padding:10px;border-radius:13px}
+.lrole b{display:block;font-size:13px}.lrole span{display:block;font-size:11px;color:hsl(var(--mutedfg));margin-top:1px}
+.lnote{margin-top:14px;text-align:center;font-size:11.5px;color:hsl(var(--mutedfg))}
+/* shell */
+#app{display:none}body.in #app{display:grid;grid-template-columns:244px minmax(0,1fr);min-height:100vh}
+#sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;background:hsl(var(--card));border-right:1px solid hsl(var(--border));padding:14px 11px;display:flex;flex-direction:column;gap:3px;z-index:30}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 8px 14px}
+.logo{width:36px;height:36px;flex:none;border-radius:10px;background:linear-gradient(145deg,hsl(var(--success)),hsl(var(--info)));color:#fff;display:grid;place-items:center}
+.brand b{font-size:13.5px;line-height:1.15;letter-spacing:-.01em}.brand small{display:block;color:hsl(var(--mutedfg));font-size:10px;font-weight:500}
+#nav{display:flex;flex-direction:column;gap:2px}
+.navcat{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:hsl(var(--mutedfg));padding:13px 9px 5px}
+#nav button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;color:hsl(var(--mutedfg));padding:8px 10px;border-radius:9px;text-align:left;font-size:13px;transition:background .15s,color .15s}
+#nav button:hover{background:hsl(var(--muted));color:hsl(var(--fg))}
+#nav button.on{background:hsl(var(--primary)/.10);color:hsl(var(--primary));font-weight:650}
+#nav button .ic{width:18px;height:18px}
+.navico{width:30px;height:30px;flex:none;border-radius:10px;display:grid;place-items:center;background:hsl(var(--info)/.10);color:hsl(var(--infofg));border:1px solid hsl(var(--info)/.16)}
+#nav button:hover .navico{background:hsl(var(--info)/.16)}
+#nav button.on .navico{background:hsl(var(--primary)/.15);color:hsl(var(--primary));border-color:hsl(var(--primary)/.24)}
+.sideFoot{margin-top:auto;padding:12px 6px 2px;border-top:1px solid hsl(var(--border));display:grid;gap:6px}
+#wrap{min-width:0;display:flex;flex-direction:column}
+#topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;min-height:58px;padding:9px 18px;background:hsl(var(--bg)/.92);backdrop-filter:blur(10px);border-bottom:1px solid hsl(var(--border))}
+#menuBtn{display:none}
+#ttl{font-size:14px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+#topbar select{max-width:190px;padding:6px 9px;font-size:12px}
+.searchbox{display:flex;align-items:center;gap:7px;margin-left:auto;background:hsl(var(--muted));border:1px solid hsl(var(--border));border-radius:9px;padding:0 10px;width:min(280px,28vw)}
+.searchbox .ic{width:15px;height:15px;color:hsl(var(--mutedfg))}
+.searchbox input{border:0!important;box-shadow:none!important;background:transparent!important;padding:7px 0!important;font-size:12.5px;min-width:0;outline:none}
+#sr{position:absolute;top:52px;right:18px;width:min(330px,80vw);background:hsl(var(--card));border:1px solid hsl(var(--border));border-radius:10px;box-shadow:0 18px 44px hsl(222 47% 11%/.22);padding:5px;display:none;z-index:40;max-height:60vh;overflow:auto}
+#sr.open{display:block}#sr button{display:flex;gap:9px;align-items:center;width:100%;border:0;background:none;color:hsl(var(--fg));padding:8px 9px;border-radius:7px;text-align:left;font-size:12.5px}
+#sr button:hover{background:hsl(var(--muted))}#sr button .ic{width:15px;height:15px}
+.iconbtn{display:grid;place-items:center;width:34px;height:34px;border:1px solid hsl(var(--border));background:hsl(var(--muted));border-radius:10px;color:hsl(var(--infofg))}
+.iconbtn:hover{color:hsl(var(--primary));border-color:hsl(var(--primary));background:hsl(var(--infobg))}
+#who{display:flex;align-items:center;gap:7px;font-size:11.5px;color:hsl(var(--mutedfg));white-space:nowrap}
+main{padding:22px 24px 34px;max-width:1360px;width:100%;margin:0 auto;flex:1}
+footer{padding:0 24px 22px;text-align:center;font-size:10.5px;color:hsl(var(--mutedfg))}
+#overlay{display:none;position:fixed;inset:0;background:rgba(2,6,23,.6);z-index:25}body.navOpen #overlay{display:block}
+/* cards, buttons, badges */
+.card{background:hsl(var(--card));border:1px solid hsl(var(--border));border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.homegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:stretch;margin-bottom:14px}
+.homegrid>.card{margin-bottom:0;display:flex;flex-direction:column}
+.homegrid .chart{flex:1}
+@media(max-width:940px){.homegrid{grid-template-columns:1fr}}
+.card.tight{padding:13px}.card h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:hsl(var(--mutedfg));margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h2::after{content:"";height:1px;background:hsl(var(--border));flex:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:8px 13px;border-radius:9px;border:1px solid transparent;background:hsl(var(--primary));color:hsl(var(--primaryfg));font-size:12.5px;font-weight:650;white-space:nowrap;transition:filter .15s,transform .1s}
+.btn:hover{filter:brightness(1.08)}.btn:active{transform:translateY(1px)}
+.btn.secondary{background:hsl(var(--card));border-color:hsl(var(--border));color:hsl(var(--fg))}
+.btn.secondary:hover{border-color:hsl(var(--primary));color:hsl(var(--primary))}
+.btn.ghost{background:transparent;color:hsl(var(--mutedfg))}
+.btn.danger{background:hsl(var(--danger));color:#fff}
+.btn.sm{padding:5px 9px;font-size:11.5px;border-radius:7px}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid hsl(var(--border));border-radius:9px;background:hsl(var(--card));color:hsl(var(--fg));outline:none;transition:border-color .15s,box-shadow .15s}
+textarea{min-height:74px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:hsl(var(--ring));box-shadow:0 0 0 3px hsl(var(--ring)/.13)}
+input[type=checkbox]{width:auto;accent-color:hsl(var(--primary))}
+label{display:block;font-size:11.5px;font-weight:650;color:hsl(var(--mutedfg));margin-bottom:4px}
+.fld{min-width:0}.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;align-items:end}
+.bdg{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:3px 9px;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+.bdg .ic{width:11px;height:11px}
+.bdg.ok{background:hsl(var(--successbg));color:hsl(var(--successfg));border-color:hsl(var(--success)/.22)}
+.bdg.info{background:hsl(var(--infobg));color:hsl(var(--infofg));border-color:hsl(var(--info)/.22)}
+.bdg.bad{background:hsl(var(--dangerbg));color:hsl(var(--dangerfg));border-color:hsl(var(--danger)/.25)}
+.bdg.warn{background:hsl(var(--warnbg));color:hsl(var(--warnfg));border-color:hsl(var(--warn)/.25)}
+.bdg.neutral{background:hsl(var(--neutralbg));color:hsl(var(--neutralfg));border-color:hsl(var(--border))}
+.tile{--tone:var(--info);width:36px;height:36px;flex:none;border-radius:12px;display:grid;place-items:center;color:#fff;background:linear-gradient(145deg,hsl(var(--tone)),hsl(var(--tone)/.8));box-shadow:0 4px 12px hsl(var(--tone)/.26),inset 0 1px 0 hsl(0 0% 100%/.38)}
+.tile .ic{filter:drop-shadow(0 1px 1px hsl(222 47% 11%/.22))}
+.tile.ok{--tone:var(--success)}.tile.info{--tone:var(--info)}
+.tile.bad{--tone:var(--danger)}.tile.warn{--tone:var(--warn)}.tile.neutral{--tone:var(--neutral)}
+.tile.sm{width:30px;height:30px;border-radius:9px}.tile.xs{width:26px;height:26px;border-radius:8px}
+.tile.sm .ic{width:17px;height:17px}.tile.xs .ic{width:15px;height:15px}
+.lrole .tile,.lrole .tile .ic,.alert .tile,.alert .tile .ic,#who .tile,#sr .tile,#sr .tile .ic{color:#fff}
+.tile.soft{border:1px solid currentColor;background:transparent;box-shadow:none}
+/* page head */
+.pageHead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.pageHead h1{display:flex;align-items:center;gap:9px;font-size:22px;font-weight:750;letter-spacing:-.035em}
+.pageHead h1 .tile{width:42px;height:42px;border-radius:13px}
+.pageHead p{color:hsl(var(--mutedfg));font-size:12.5px;margin-top:4px}
+/* kpis */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:11px;margin-bottom:14px}
+.kpi{position:relative;background:hsl(var(--card));border:1px solid hsl(var(--border));border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);overflow:hidden}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:hsl(var(--tone))}
+.kpi .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.kpi .lab{font-size:11px;color:hsl(var(--mutedfg));font-weight:650;text-transform:uppercase;letter-spacing:.05em}
+.kpi .val{font-size:25px;font-weight:750;letter-spacing:-.04em;margin-top:6px;font-variant-numeric:tabular-nums}
+.kpi .sub{font-size:11px;color:hsl(var(--mutedfg));margin-top:2px}
+.kpi.ok{--tone:var(--success)}.kpi.info{--tone:var(--info)}.kpi.bad{--tone:var(--danger)}.kpi.warn{--tone:var(--warn)}
+.kpi[role="button"]{cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s}
+.kpi[role="button"]:hover{transform:translateY(-2px);border-color:hsl(var(--tone));box-shadow:0 8px 22px hsl(var(--tone)/.14)}
+.kpi[role="button"]:focus-visible{outline:3px solid hsl(var(--ring)/.35);outline-offset:2px}
+/* tables */
+.tw{overflow-x:auto;margin:0 -4px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:9px 10px;text-align:left;border-bottom:1px solid hsl(var(--border));white-space:nowrap}
+th{position:sticky;top:0;background:hsl(var(--muted));font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:hsl(var(--mutedfg));font-weight:700;z-index:1}
+tbody tr:hover td{background:hsl(var(--primary)/.045)}
+tbody tr[role="button"]{cursor:pointer}
+tbody tr[role="button"]:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:-2px}
+tbody tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
+td b{font-weight:650}
+.empty{text-align:center!important;color:hsl(var(--mutedfg));padding:26px!important}
+/* toolbar & tabs */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.toolbar input{max-width:230px}.toolbar select{max-width:165px}
+.seg{display:inline-flex;gap:2px;padding:3px;background:hsl(var(--muted));border:1px solid hsl(var(--border));border-radius:9px}
+.seg button{border:0;background:none;color:hsl(var(--mutedfg));padding:5px 11px;border-radius:7px;font-size:12px;font-weight:600}
+.seg button.on{background:hsl(var(--card));color:hsl(var(--fg));box-shadow:0 1px 3px hsl(222 47% 11%/.12)}
+/* alerts, chart, calendar */
+.alert{display:flex;gap:10px;align-items:flex-start;padding:10px 11px;border-radius:9px;margin-bottom:8px;border:1px solid hsl(var(--tone)/.25);background:hsl(var(--tonebg));color:hsl(var(--fg))}
+.alert .tile{width:32px;height:32px;border-radius:10px}
+.alert b{font-size:12.5px;display:block}.alert span{font-size:11.5px;color:hsl(var(--mutedfg))}
+.alert.ok{--tone:var(--success);--tonebg:var(--successbg)}.alert.info{--tone:var(--info);--tonebg:var(--infobg)}
+.alert.bad{--tone:var(--danger);--tonebg:var(--dangerbg)}.alert.warn{--tone:var(--warn);--tonebg:var(--warnbg)}
+.alert[role="button"]{cursor:pointer;transition:transform .15s,box-shadow .15s}
+.alert[role="button"]:hover{transform:translateX(3px);box-shadow:0 6px 16px hsl(var(--tone)/.15)}
+.alert[role="button"]:focus-visible{outline:3px solid hsl(var(--tone)/.3);outline-offset:2px}
+.chart{display:flex;align-items:flex-end;gap:5px;height:118px;padding-top:8px}
+.chart .bar{flex:1;min-width:6px;border-radius:5px 5px 0 0;background:linear-gradient(180deg,hsl(var(--info)),hsl(var(--primary)));position:relative;transition:height .3s}
+.chart .bar.zer{background:hsl(var(--muted))}
+.chart .bar{cursor:pointer;transition:filter .15s,transform .15s}
+.chart .bar:hover{filter:brightness(1.08);transform:scaleY(1.03)}
+.chart .bar:hover::after{content:attr(data-t);position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:hsl(var(--fg));color:hsl(var(--bg));font-size:10px;padding:3px 7px;border-radius:6px;white-space:nowrap;z-index:3}
+.axis{display:flex;gap:5px;margin-top:5px}.axis span{flex:1;min-width:6px;text-align:center;font-size:9.5px;color:hsl(var(--mutedfg))}
+.calShell{border:1px solid hsl(var(--border));border-radius:12px;background:hsl(var(--card));box-shadow:var(--shadow);overflow:hidden}
+.calbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid hsl(var(--border));background:hsl(var(--muted)/.45)}
+.calbar h2{font-size:15px;font-weight:700;letter-spacing:-.02em;margin-right:auto}
+.calnav{display:inline-flex;gap:4px;align-items:center}
+.calnav button{width:30px;height:30px;display:grid;place-items:center;border:1px solid hsl(var(--border));border-radius:8px;background:hsl(var(--card));color:hsl(var(--fg))}
+.calnav button:hover{color:hsl(var(--primary));border-color:hsl(var(--primary))}
+.calnav .ic{width:16px;height:16px}
+.calToday{padding:5px 11px;border:1px solid hsl(var(--border));border-radius:8px;background:hsl(var(--card));font-size:12px;font-weight:650}
+.calToday:hover{color:hsl(var(--primary));border-color:hsl(var(--primary))}
+.calScroll{overflow-x:auto}
+.monthGrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));min-width:880px}
+.monthHead{padding:8px 9px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:hsl(var(--mutedfg));border-bottom:1px solid hsl(var(--border));border-right:1px solid hsl(var(--border));background:hsl(var(--muted)/.5)}
+.monthHead:last-child{border-right:0}
+.monthCell{min-height:112px;padding:5px;border-bottom:1px solid hsl(var(--border));border-right:1px solid hsl(var(--border));background:hsl(var(--card));cursor:pointer;transition:background .15s}
+.monthCell:nth-child(7n){border-right:0}
+.monthCell:hover{background:hsl(var(--primary)/.035)}
+.monthCell.out{background:hsl(var(--muted)/.34)}
+.monthNum{width:24px;height:24px;display:grid;place-items:center;border-radius:50%;font-size:11.5px;font-weight:650;color:hsl(var(--fg));margin-bottom:4px}
+.monthCell.today .monthNum{background:hsl(var(--primary));color:hsl(var(--primaryfg));box-shadow:0 2px 8px hsl(var(--primary)/.35)}
+.monthCell.sel .monthNum{box-shadow:0 0 0 2px hsl(var(--primary)/.35)}
+.eventChip{display:block;width:100%;text-align:left;border:0;border-left:3px solid hsl(var(--tone));background:hsl(var(--tonebg));color:hsl(var(--fg));border-radius:0 6px 6px 0;padding:3px 6px;margin-bottom:4px;font-size:10.5px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.eventChip b{color:hsl(var(--tonefg));font-weight:700}
+.eventChip:hover{filter:brightness(.97)}
+.eventChip.on{box-shadow:0 0 0 2px hsl(var(--primary)/.45)}
+.eventMore{border:0;background:none;color:hsl(var(--primary));font-size:10px;font-weight:650;padding:1px 4px}
+.eventEmpty{font-size:10px;color:hsl(var(--mutedfg));opacity:.65}
+.dayLayout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}
+.dayMain{display:grid;gap:14px;min-width:0}
+.dayMain .card{margin-bottom:0}
+.teamPanel{position:sticky;top:14px}
+.activityList{display:grid;gap:6px}
+.activityRow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid hsl(var(--border));border-left:3px solid hsl(var(--tone));border-radius:8px;background:hsl(var(--tonebg));padding:7px 9px;color:hsl(var(--fg))}
+.activityRow:hover{filter:brightness(.98)}
+.activityRow.on{box-shadow:0 0 0 2px hsl(var(--primary)/.35)}
+.activityRow .at{font-variant-numeric:tabular-nums;font-weight:750;color:hsl(var(--tonefg));font-size:12px;min-width:44px}
+.activityRow .an{font-size:12px;font-weight:650;display:block}
+.activityRow .as{font-size:10.5px;color:hsl(var(--mutedfg));display:block}
+.timeGrid{border:1px solid hsl(var(--border));border-radius:9px;overflow:hidden;position:relative}
+.timeRow{display:grid;grid-template-columns:54px 1fr;height:52px;border-bottom:1px solid hsl(var(--border))}
+.timeRow:last-child{border-bottom:0}
+.timeLabel{font-size:10px;color:hsl(var(--mutedfg));padding:5px 7px 0 0;text-align:right;font-variant-numeric:tabular-nums}
+.timeSlot{position:relative;border-left:1px solid hsl(var(--border));background:linear-gradient(to bottom,transparent 49%,hsl(var(--border)/.45) 50%,transparent 51%)}
+.timeSlot.now{background:hsl(var(--primary)/.06)}
+.dayEvent{position:absolute;left:62px;right:8px;height:46px;border:0;border-left:3px solid hsl(var(--tone));border-radius:0 8px 8px 0;background:hsl(var(--tonebg));color:hsl(var(--fg));text-align:left;padding:5px 8px;overflow:hidden;box-shadow:0 3px 10px hsl(var(--tone)/.12)}
+.dayEvent:hover{filter:brightness(.98)}
+.dayEvent.on{box-shadow:0 0 0 2px hsl(var(--primary)/.5)}
+.dayEvent b{display:block;font-size:11px;color:hsl(var(--tonefg));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dayEvent span{display:block;font-size:10px;color:hsl(var(--mutedfg));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.teamBlock{padding:10px;border:1px solid hsl(var(--border));border-radius:10px;background:hsl(var(--muted)/.5);margin-bottom:8px}
+.teamBlock small{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:hsl(var(--mutedfg));margin-bottom:3px}
+.teamBlock b{font-size:12.5px}
+.teamBlock .rowline{display:flex;gap:8px;align-items:center}
+.personChip{display:inline-flex;align-items:center;gap:5px;border:1px solid hsl(var(--border));background:hsl(var(--card));border-radius:999px;padding:3px 8px;font-size:10.5px;font-weight:600;margin:3px 3px 0 0}
+.personChip.driver{border-color:hsl(var(--success)/.45);background:hsl(var(--successbg))}
+.personChip .ic{width:12px;height:12px}
+.nowLine{position:absolute;left:54px;right:0;height:2px;background:hsl(var(--danger));z-index:2;pointer-events:none}
+.nowLine::before{content:"";position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:hsl(var(--danger))}
+select[multiple]{min-height:96px;padding:4px}
+@media(max-width:1100px){.dayLayout{grid-template-columns:1fr}.teamPanel{position:static}}
+@media(max-width:640px){.monthGrid{min-width:760px}.calbar h2{width:100%;margin-right:0}}
+/* dialog & toast */
+#dialog{display:none;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center;padding:18px}
+#dialog.open{display:flex}.backdrop{position:absolute;inset:0;background:rgba(2,6,23,.66);backdrop-filter:blur(3px)}
+.dlg{position:relative;background:hsl(var(--card));border:1px solid hsl(var(--border));border-radius:14px;width:100%;max-width:620px;max-height:88vh;overflow:auto;box-shadow:0 24px 70px rgba(0,0,0,.4);animation:pop .16s ease}
+.dlg.wide{max-width:820px}@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.985)}}
+.dlgHead{display:flex;gap:11px;align-items:center;padding:16px 18px;border-bottom:1px solid hsl(var(--border))}
+.dlgHead h2{font-size:15.5px;font-weight:700;letter-spacing:-.02em}.dlgHead p{font-size:11.5px;color:hsl(var(--mutedfg));margin-top:2px}
+.dlgHead .iconbtn{margin-left:auto}
+.dlgBody{padding:18px}.dlgFoot{display:flex;gap:8px;justify-content:flex-end;padding:13px 18px;border-top:1px solid hsl(var(--border));background:hsl(var(--muted)/.4)}
+#toasts{position:fixed;right:16px;bottom:16px;z-index:200;display:grid;gap:8px}
+.toast{display:flex;align-items:center;gap:9px;min-width:230px;max-width:360px;background:hsl(var(--card));border:1px solid hsl(var(--border));border-left:3px solid hsl(var(--tone));border-radius:9px;padding:10px 12px;font-size:12px;box-shadow:0 12px 30px rgba(0,0,0,.25);animation:tin .2s ease}
+.toast.ok{--tone:var(--success)}.toast.info{--tone:var(--info)}.toast.bad{--tone:var(--danger)}.toast.warn{--tone:var(--warn)}
+.toast.out{opacity:0;transform:translateY(8px);transition:.25s}@keyframes tin{from{opacity:0;transform:translateY(10px)}}
+.watermark{position:relative}.watermark::after{content:"SAMPLE";position:absolute;inset:0;display:grid;place-items:center;font-size:64px;font-weight:900;letter-spacing:.15em;color:hsl(var(--danger)/.09);transform:rotate(-18deg);pointer-events:none}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kv div{background:hsl(var(--muted));border-radius:9px;padding:9px 11px}.kv small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:hsl(var(--mutedfg))}.kv b{font-size:13px;font-weight:650}
+.notice{font-size:11.5px;color:hsl(var(--mutedfg));background:hsl(var(--muted));border-radius:8px;padding:9px 11px;margin-bottom:12px;border-left:3px solid hsl(var(--info))}
+@media(max-width:920px){
+ body.in #app{grid-template-columns:1fr}
+ #sidebar{position:fixed;left:0;top:0;bottom:0;width:268px;transform:translateX(-105%);transition:transform .2s}body.navOpen #sidebar{transform:none}
+ #menuBtn{display:grid}#ttl{font-size:12px}.searchbox{width:auto;flex:1}
+ #sr{right:10px;left:10px;width:auto}main{padding:15px 12px 26px}footer{padding-bottom:18px}
+ .pageHead h1{font-size:19px}
+}
+@media(max-width:640px){#who span{display:none}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cal{grid-template-columns:repeat(7,minmax(110px,1fr))}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<a href="#main" class="skip">Skip to content</a>
+<div id="banner"><span id="bannerTxt">DEMO – SAMPLE DATA ONLY · Fictional patients, donors and records · Not a clinical or accounting system</span></div>
+
+<div id="login"><div class="lc">
+ <div class="lhead"><div class="logo"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" />
+  <path d="M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27" /></svg></div>
+ <h1>Thanal</h1><p>Pain &amp; Palliative Care Management System</p></div>
+ <div class="card"><h2>Choose a demo role to continue</h2><div class="lgrid" id="lgrid"></div></div>
+ <p class="lnote">Standalone demonstration · No login credentials required · No real patient or financial data</p>
+</div></div>
+
+<div id="app">
+ <aside id="sidebar">
+  <div class="brand"><div class="logo"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" />
+  <path d="M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27" /></svg></div><div><b>Thanal</b><small>Palliative care · DEMO</small></div></div>
+  <nav id="nav"></nav>
+  <div class="sideFoot"><button class="btn secondary sm" onclick="doSignOut()">Sign out / switch role</button><span class="tiny muted">v1.0 · Fictional sample data</span></div>
+ </aside>
+ <div id="wrap">
+  <header id="topbar">
+   <button id="menuBtn" class="iconbtn" onclick="tglNav()" aria-label="Toggle navigation"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 5h16" />
+  <path d="M4 12h16" />
+  <path d="M4 19h16" /></svg></button>
+   <h1 id="ttl">Dashboard</h1>
+   <div class="searchbox"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m21 21-4.34-4.34" />
+  <circle cx="11" cy="11" r="8" /></svg><input id="gs" type="search" placeholder="Search patients, visits, donations…" aria-label="Global search" oninput="gSearch(this.value)" autocomplete="off"></div>
+   <div id="sr"></div>
+   <select id="roleSel" onchange="switchRole(this.value)" aria-label="Demo role" title="Demo role switcher"></select>
+   <button id="langBtn" class="btn secondary sm" onclick="tglLang()" title="English / Malayalam">EN</button>
+   <button class="iconbtn" onclick="openAlerts()" title="Alerts" aria-label="Alerts"><span id="bellDot"></span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0" />
+  <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></svg></button>
+   <button id="themeBtn" class="iconbtn" onclick="tglTheme()" title="Toggle theme" aria-label="Toggle theme"></button>
+   <div id="who"></div>
+  </header>
+  <main id="main" tabindex="-1"></main>
+  <footer>Thanal · Standalone demo · Fictional data only · No connection to the live website or systems</footer>
+ </div>
+</div>
+<div id="overlay" onclick="document.body.classList.remove('navOpen')"></div>
+<div id="dialog"></div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+/* ============ ICONS (Lucide-style stroke paths) ============ */
+/* Real Lucide icons (ISC) · lucide-static v1.78.0 · embedded inline */
+const P={
+  dashboard:`<rect width="7" height="9" x="3" y="3" rx="1" />
+  <rect width="7" height="5" x="14" y="3" rx="1" />
+  <rect width="7" height="9" x="14" y="12" rx="1" />
+  <rect width="7" height="5" x="3" y="16" rx="1" />`,
+  users:`<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+  <path d="M16 3.128a4 4 0 0 1 0 7.744" />
+  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+  <circle cx="9" cy="7" r="4" />`,
+  calendar:`<path d="M8 2v3" />
+  <path d="M16 2v3" />
+  <rect x="3" y="3" width="18" height="18" rx="2" />
+  <path d="M3 9h18" />
+  <path d="M8 13h.01" />
+  <path d="M12 13h.01" />
+  <path d="M16 13h.01" />
+  <path d="M8 17h.01" />
+  <path d="M12 17h.01" />
+  <path d="M16 17h.01" />`,
+  chevronLeft:`<path d="m15 18-6-6 6-6" />`,
+  chevronRight:`<path d="m9 18 6-6-6-6" />`,
+  stethoscope:`<path d="M11 2v2" />
+  <path d="M5 2v2" />
+  <path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1" />
+  <path d="M8 15a6 6 0 0 0 12 0v-3" />
+  <circle cx="20" cy="10" r="2" />`,
+  heart:`<path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" />`,
+  handCoins:`<path d="M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17" />
+  <path d="m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9" />
+  <path d="m2 16 6 6" />
+  <circle cx="16" cy="9" r="2.9" />
+  <circle cx="6" cy="5" r="3" />`,
+  receipt:`<path d="M12 17V7" />
+  <path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8" />
+  <path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z" />`,
+  book:`<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" />
+  <path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" />`,
+  pills:`<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
+  <path d="m8.5 8.5 7 7" />`,
+  chart:`<path d="M13 17V9" />
+  <path d="M18 17V5" />
+  <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+  <path d="M8 17v-3" />`,
+  shield:`<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+  <path d="m9 12 2 2 4-4" />`,
+  search:`<path d="m21 21-4.34-4.34" />
+  <circle cx="11" cy="11" r="8" />`,
+  plus:`<path d="M5 12h14" />
+  <path d="M12 5v14" />`,
+  x:`<path d="M18 6 6 18" />
+  <path d="m6 6 12 12" />`,
+  check:`<path d="M20 6 9 17l-5-5" />`,
+  alert:`<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+  <path d="M12 9v4" />
+  <path d="M12 17h.01" />`,
+  info:`<circle cx="12" cy="12" r="10" />
+  <path d="M12 16v-4" />
+  <path d="M12 8h.01" />`,
+  clock:`<circle cx="12" cy="12" r="10" />
+  <path d="M12 6v6l4 2" />`,
+  download:`<path d="M12 15V3" />
+  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+  <path d="m7 10 5 5 5-5" />`,
+  print:`<path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+  <path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" />
+  <rect x="6" y="14" width="12" height="8" rx="1" />`,
+  sun:`<circle cx="12" cy="12" r="4" />
+  <path d="M12 2v2" />
+  <path d="M12 20v2" />
+  <path d="m4.93 4.93 1.41 1.41" />
+  <path d="m17.66 17.66 1.41 1.41" />
+  <path d="M2 12h2" />
+  <path d="M20 12h2" />
+  <path d="m6.34 17.66-1.41 1.41" />
+  <path d="m19.07 4.93-1.41 1.41" />`,
+  moon:`<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" />`,
+  file:`<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+  <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+  <path d="M10 9H8" />
+  <path d="M16 13H8" />
+  <path d="M16 17H8" />`,
+  truck:`<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+  <path d="M15 18H9" />
+  <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
+  <circle cx="17" cy="18" r="2" />
+  <circle cx="7" cy="18" r="2" />`,
+  car:`<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+  <circle cx="7" cy="17" r="2" />
+  <path d="M9 17h6" />
+  <circle cx="17" cy="17" r="2" />`,
+  refresh:`<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+  <path d="M21 3v5h-5" />
+  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+  <path d="M8 16H3v5" />`,
+  eye:`<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+  <circle cx="12" cy="12" r="3" />`,
+  lock:`<rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+  <path d="M7 11V7a5 5 0 0 1 10 0v4" />`,
+  user:`<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+  <circle cx="12" cy="7" r="4" />`,
+  phone:`<path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384" />`,
+  pin:`<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
+  <circle cx="12" cy="10" r="3" />`,
+  activity:`<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2" />`,
+  bag:`<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
+  <path d="M12 22V12" />
+  <polyline points="3.29 7 12 12 20.71 7" />
+  <path d="m7.5 4.27 9 5.15" />`,
+  settings:`<path d="M14 17H5" />
+  <path d="M19 7h-9" />
+  <circle cx="17" cy="17" r="3" />
+  <circle cx="7" cy="7" r="3" />`,
+  heartPulse:`<path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" />
+  <path d="M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27" />`,
+  menu:`<path d="M4 5h16" />
+  <path d="M4 12h16" />
+  <path d="M4 19h16" />`,
+  logOut:`<path d="m16 17 5-5-5-5" />
+  <path d="M21 12H9" />
+  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />`
+};
+const ic=(n,c='')=>`<svg class="ic ${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]||P.info}</svg>`;
+
+/* ============ STATE & DATA ============ */
+const LSKEY='thanal_demo_v3';
+const S={role:'admin',lang:'en',tab:'dashboard',sub:{},q:'',signed:false};
+const D0=new Date();D0.setHours(0,0,0,0);
+const fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const dt=n=>{const x=new Date(D0);x.setDate(x.getDate()+n);return fmt(x)};
+const TODAY=dt(0);
+const WEEK=(()=>{const x=new Date(D0);x.setDate(x.getDate()-((x.getDay()+6)%7));return Array.from({length:7},(_,i)=>{const y=new Date(x);y.setDate(y.getDate()+i);return fmt(y)})})();
+const WD=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const CAL={cursor:TODAY.slice(0,7)+'-01',day:TODAY,selected:''};
+const parseD=s=>{const [y,m,d]=String(s).split('-').map(Number);return new Date(y,(m||1)-1,d||1)};
+const addDays=(s,n)=>{const x=parseD(s);x.setDate(x.getDate()+n);return fmt(x)};
+const addMonths=(s,n)=>{const x=parseD(s);x.setDate(1);x.setMonth(x.getMonth()+n);return fmt(x)};
+const mondayOf=s=>{const x=parseD(s);x.setDate(x.getDate()-((x.getDay()+6)%7));return fmt(x)};
+const longDate=s=>parseD(s).toLocaleDateString(S.lang==='ml'?'ml-IN':'en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+const monthName=s=>parseD(s).toLocaleDateString(S.lang==='ml'?'ml-IN':'en-IN',{month:'long',year:'numeric'});
+
+const ROLES=[
+ ['admin','Super Administrator','admin@thanal.demo','settings','Configure system, users, roles and audit logs'],
+ ['management','Management / Committee','management@thanal.demo','chart','Dashboards, reports and approved financial summaries'],
+ ['coordinator','Unit Coordinator','coordinator@thanal.demo','users','Register patients, schedule visits and assign teams'],
+ ['doctor','Doctor / Clinical Lead','doctor@thanal.demo','stethoscope','Clinical records, assessments and care plans'],
+ ['nurse','Nurse','nurse@thanal.demo','activity','Observations, vitals, medication and follow-up notes'],
+ ['volunteer','Volunteer / Member','volunteer@thanal.demo','heart','Assigned visits, attendance and expense claims'],
+ ['submitter','Accounts Submitter','submitter@thanal.demo','receipt','Enter donations and submit expense claims'],
+ ['verifier','Accounts Verifier','verifier@thanal.demo','check','Review claims and evidence; cannot approve own claim'],
+ ['head','Accounts Head','head@thanal.demo','book','Post approved transactions and reconcile ledgers'],
+ ['inventory','Inventory Manager','inventory@thanal.demo','pills','Medicines, batches, equipment and stock movements']
+];
+const RMOD={
+ admin:'dashboard patients visits clinical volunteers donations expenses finance inventory reports admin',
+ management:'dashboard patients visits volunteers donations expenses finance inventory reports',
+ coordinator:'dashboard patients visits clinical volunteers inventory reports',
+ doctor:'dashboard patients visits clinical reports',
+ nurse:'dashboard patients visits clinical',
+ volunteer:'dashboard visits volunteers expenses',
+ submitter:'dashboard donations expenses finance',
+ verifier:'dashboard expenses finance reports',
+ head:'dashboard donations expenses finance reports',
+ inventory:'dashboard inventory reports'
+};
+const RACT={
+ admin:'*',management:'view reports',coordinator:'patients schedule visit',doctor:'clinical authorize',
+ nurse:'observe visit',volunteer:'expense attendance',submitter:'donation expense',
+ verifier:'verify',head:'post reconcile',inventory:'stock'
+};
+const NAV=[
+ ['dashboard','Dashboard','dashboard','overview'],
+ ['patients','Patients','users','care'],['visits','Visits','calendar','care'],['clinical','Clinical','stethoscope','care'],
+ ['volunteers','Volunteers','heart','people'],
+ ['donations','Donations','handCoins','finance'],['expenses','Expenses','receipt','finance'],['finance','Finance','book','finance'],
+ ['inventory','Inventory','pills','operations'],['reports','Reports','chart','operations'],
+ ['admin','Administration','settings','system']
+];
+const NAVCAT={overview:'Overview',care:'Patient care',people:'People',finance:'Finance',operations:'Operations & reports',system:'System'};
+const MAL={Dashboard:'ഡാഷ്ബോർഡ്',Patients:'രോഗികൾ',Visits:'സന്ദർശനങ്ങൾ',Clinical:'ക്ലിനിക്കൽ',Volunteers:'സന്നദ്ധപ്രവർത്തകർ',Donations:'സംഭാവനകൾ',Expenses:'ചെലവുകൾ',Finance:'ധനകാര്യം',Inventory:'ഇൻവെന്ററി',Reports:'റിപ്പോർട്ടുകൾ',Administration:'ഭരണം',Overview:'അവലോകനം','Patient care':'രോഗി പരിചരണം',People:'ആളുകൾ',Operations:'പ്രവർത്തനങ്ങൾ',System:'സിസ്റ്റം','Add patient':'രോഗിയെ ചേർക്കുക','Add visit':'സന്ദർശനം ചേർക്കുക','Add donation':'സംഭാവന ചേർക്കുക','Submit expense':'ചെലവ് സമർപ്പിക്കുക','Search':'തിരയുക','Close':'അടയ്ക്കുക','Save':'സൂക്ഷിക്കുക','Export':'ഡൗൺലോഡ്','Completed':'പൂർത്തിയായി','Planned':'ഷെഡ്യൂൾ ചെയ്തു','Pending':'തീരുമാനത്തിലാണ്'};
+const t=s=>S.lang==='ml'?(MAL[s]||s):s;
+const can=a=>RACT[S.role]==='*'||(RACT[S.role]||'').split(' ').includes(a);
+const allowed=m=>(RMOD[S.role]||'').split(' ').includes(m);
+const me=()=>ROLES.find(r=>r[0]===S.role)||ROLES[0];
+const uname=()=>me()[1];
+
+const TONE={'Active':'ok','Completed':'ok','Approved':'ok','Posted':'ok','Available':'ok','In stock':'ok','Reconciled':'ok','Yes':'ok','Normal':'ok','Verified':'ok',
+'Planned':'info','In progress':'info','Pending':'info','Under review':'info','Submitted':'info','Near expiry':'info','Low risk':'info','Scheduled':'info','On time':'info',
+'Overdue':'bad','Cancelled':'bad','Rejected':'bad','Expired':'bad','Critical':'bad','High':'bad','Out of stock':'bad','High priority':'bad','Low stock':'bad',
+'On hold':'neutral','Discharged':'neutral','Deceased':'neutral','Inactive':'neutral','Draft':'neutral','No':'neutral','Damaged':'neutral','In use':'info'};
+const tone=s=>TONE[s]||'neutral';
+const badge=s=>`<span class="bdg ${tone(s)}">${esc(s)}</span>`;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>'₹'+(+n||0).toLocaleString('en-IN',{maximumFractionDigits:2,minimumFractionDigits:2});
+const sum=(a,f)=>a.reduce((x,y)=>x+f(y),0);
+const byId=(a,id)=>a.find(x=>x.id===id);
+let LASTFORM={};
+const v=(id)=>{const e=document.getElementById(id);return e?e.value:(LASTFORM[id]??'')};
+const vals=id=>[...(document.getElementById(id)?.selectedOptions||[])].map(o=>o.value);
+const num=id=>Number(v(id))||0;
+const uid=p=>p+'-'+Date.now().toString(36).slice(-4).toUpperCase()+Math.floor(Math.random()*90+10);
+const daysTo=d=>Math.round((new Date(d+'T00:00:00')-D0)/864e5);
+
+function seed(){
+ const NAMES=[['Ammini K.',68,'F','Kottayam','Cancer – palliative'],['Raghavan P.',74,'M','Kumarakom','COPD'],['Lakshmi A.',59,'F','Kottayam','Post-operative care'],['Sukumaran N.',81,'M','Pala','Dementia'],['Mary J.',66,'F','Ettumanoor','Cancer – home care'],['Joseph V.',71,'M','Kottayam','Heart failure'],['Karthyayani R.',78,'F','Pala','Fracture recovery'],['Mohammed S.',62,'M','Kumarakom','Diabetic complications'],['Leelamma T.',69,'F','Ettumanoor','Palliative – general'],['Oommen M.',55,'M','Kottayam','Neurological condition'],['Saramma D.',83,'F','Pala','Bedbound care'],['Baby K.',70,'F','Kumarakom','Renal support']];
+ const patients=NAMES.map((p,i)=>({id:'THN-PAT-'+String(i+1).padStart(6,'0'),name:p[0],age:p[1],gender:p[2],locality:p[3],dx:p[4],phone:'+91 94470 '+String(10001+i),status:i===9?'On hold':i===10?'Discharged':'Active',risk:i%4===0?'High':'Normal',doctor:'Dr. R. Menon',nurse:'Sister Lissy',registered:dt(-70+i*5),caretaker:'Family member',address:'Ward '+((i%7)+1)+', '+p[3]}));
+ const plan=[[0,0,'09:30','Wound care'],[1,0,'11:00','Medication review'],[3,0,'14:30','Vitals & pain review'],[4,1,'09:00','Care plan update'],[2,1,'11:30','Observation'],[6,1,'15:00','Family guidance'],[7,2,'09:45','Medication issue'],[8,2,'12:00','Bedside assessment'],[9,2,'15:30','Review'],[10,3,'09:00','Routine visit'],[0,3,'11:15','Dressing change'],[5,3,'14:00','Vitals'],[11,4,'09:30','Palliative review'],[3,4,'12:30','Observation'],[1,4,'15:00','Follow-up'],[4,5,'10:00','Medication review'],[8,5,'13:30','Care plan'],[2,6,'09:00','Weekend check'],[6,6,'11:00','Supply delivery']];
+ const nurses=[['Sister Lissy','+91 94471 20007','Clinical visits'],['Sister Ancy','+91 94471 20008','Clinical visits'],['Sister Sheela','+91 94471 20009','Palliative visits']].map((x,i)=>({id:'THN-NUR-'+String(i+1).padStart(4,'0'),name:x[0],phone:x[1],skills:x[2],availability:'Available'}));
+ const nurseNames=nurses.map(x=>x.name);
+ const members=[['Anu Mathew','Home visits, counselling',false],['Biju Paul','Transport, supplies',false],['Celine George','Pharmacy liaison',false],['Daisy Thomas','Patient support',false],['Leena John','Family guidance',false],['Rajan K.','Car driver · KL-05 AB 1234',true],['Suresh M.','Car driver · KL-05 CD 5678',true]].map((x,i)=>({id:'THN-VOL-'+String(i+1).padStart(4,'0'),name:x[0],role:'Volunteer',canDrive:x[2],phone:'+91 94471 '+String(20001+i),availability:i===2?'Unavailable':'Available',hours:[42,28,16,61,34,35,22][i],skills:x[1],joined:dt(-200+i*12)}));
+ const volunteers=members;
+ const careMembers=members.filter(x=>!x.canDrive).map(x=>x.name);
+ const drivers=members.filter(x=>x.canDrive).map(x=>x.name);
+ const visits=plan.map((p,i)=>{const date=WEEK[p[1]],dd=daysTo(date);let st=dd<0?'Completed':dd===0?(i%4===0?'Completed':i%4===1?'In progress':'Planned'):'Planned';if(i===14)st='Overdue';if(i===17)st='Cancelled';
+  const driver=drivers[i%drivers.length];
+  const team=[careMembers[i%careMembers.length],careMembers[(i+2)%careMembers.length],driver].filter((x,j,a)=>a.indexOf(x)===j);
+  return{id:'VIS-'+String(i+1).padStart(4,'0'),patientId:patients[p[0]].id,date,time:p[2],purpose:p[3],priority:i%7===0?'High':'Normal',status:st,nurse:nurseNames[i%nurseNames.length],volunteers:team,driver,outcome:st==='Completed'?'Observations recorded; care continued':''}});
+ const observations=[
+  {id:'OBS-001',patientId:patients[0].id,visitId:'VIS-0001',author:'Sister Lissy',date:dt(-8),bp:'128/82',pulse:'76',temp:'36.8',spo2:'97',pain:'3',notes:'Wound clean, healing well. Family counselled.',amended:false},
+  {id:'OBS-002',patientId:patients[1].id,visitId:'VIS-0002',author:'Sister Ancy',date:dt(-6),bp:'142/88',pulse:'82',temp:'37.1',spo2:'94',pain:'5',notes:'Breathlessness improved after medication review.',amended:false},
+  {id:'OBS-003',patientId:patients[4].id,visitId:'VIS-0004',author:'Sister Lissy',date:dt(-3),bp:'118/76',pulse:'70',temp:'36.6',spo2:'98',pain:'2',notes:'Stable. dose adjusted by doctor.',amended:true,amendReason:'Time corrected by author'}
+ ];
+ const donations=[['Kerala Welfare Trust','General',25000,'Bank','Reconciled',false],['Anonymous','Patient care',5000,'Cash','Pending',false],['Dr. R. Menon','Medicines',3500,'UPI','Reconciled',false],['Anonymous','General',1200,'Cash','Pending',true],['Rotary Club Kottayam','Equipment',45000,'Bank','Reconciled',true],['Priya Nair','General',2000,'UPI','Pending',false],['St. Mary’s Parish','Patient care',15000,'Cheque','Reconciled',false],['Anonymous','Medicines',750,'Cash','Pending',false]].map((x,i)=>({id:'DON-'+String(i+1).padStart(4,'0'),donor:x[0],anonymous:x[0]==='Anonymous',amount:x[2],method:x[3],category:x[1],date:dt(-2-i*4),receivedBy:'Accounts Submitter',receipt:'RCP-'+String(2401+i),reconciled:x[4],restricted:x[5]}));
+ const expenses=[['Biju Paul','Fuel for home visits',1850,'Transport','Submitted','',false],['Anu Mathew','Patient medicines',2760,'Medicines','Under review','',false],['Sister Ancy','Dressing material',1320,'Medical supplies','Approved','',false],['Rajan K.','Vehicle service',5400,'Maintenance','Posted','',false],['Celine George','Office stationery',640,'Administration','Rejected','Bill not legible',false],['Accounts Verifier','Bank charges',250,'Administration','Submitted','',true],['Daisy Thomas','Nutrition support',3100,'Patient support','Approved','',false]].map((x,i)=>({id:'EXP-'+String(i+1).padStart(4,'0'),submitter:x[0],description:x[1],amount:x[2],category:x[3],status:x[4],reason:x[5],selfFlag:x[6],date:dt(-1-i*3),method:'Cash',verifier:x[4]==='Submitted'?'':x[4]==='Rejected'?'Accounts Verifier':'Accounts Verifier',postedBy:x[4]==='Posted'?'Accounts Head':''}));
+ const ledger=[['Income','Donation receipt','General fund',25000,'DON-001'],['Expense','Vehicle service','Maintenance',5400,'EXP-004'],['Income','Donation receipt','Patient care',15000,'DON-007'],['Expense','Dressing material','Medical supplies',1320,'EXP-003'],['Income','Grant receipt','Equipment fund',45000,'DON-005']].map((x,i)=>({id:'VOU-'+String(1201+i),date:dt(-i*5),type:x[0],particulars:x[1],account:x[2],amount:x[3],ref:x[4],reconciled:i!==2}));
+ const meds=[['Paracetamol 500mg','Paracetamol','500 mg',20,'In stock'],['Morphine 10mg','Morphine','10 mg',35,'Near expiry'],['Amoxicillin 500mg','Amoxicillin','500 mg',90,'In stock'],['Furosemide 40mg','Furosemide','40 mg',12,'Near expiry'],['Codeine syrup','Codeine','15 mg/5ml',200,'In stock'],['Tramadol 50mg','Tramadol','50 mg',-10,'Expired'],['Omeprazole 20mg','Omeprazole','20 mg',55,'In stock'],['Normal saline 500ml','Saline','500 ml',4,'Low stock']].map((x,i)=>({id:'MED-'+String(i+1).padStart(4,'0'),name:x[0],generic:x[1],strength:x[2],batch:'B-24'+String(110+i),expiry:dt(x[3]),qty:[120,48,300,60,85,20,140,8][i],min:[50,40,100,30,40,20,60,25][i],unit:'units',supplier:'Kerala Medical Distributors',movement:i%2?'Issue':'Receipt'}));
+ const equipment=[['Wheelchair','EQ-001','WC-0042','Good','Kottayam unit','Ammini K.',18],['Oxygen concentrator','EQ-002','OC-0011','Good','Kumarakom unit','Raghavan P.',-3],['Nebulizer','EQ-003','NB-0087','Fair','Central store','',45],['Hospital bed','EQ-004','HB-0021','Good','Pala unit','Saramma D.',90],['BP monitor','EQ-005','BP-0134','Good','Central store','',12]].map(x=>({id:x[1],name:x[0],assetId:x[1],serial:x[2],condition:x[3],location:x[4],assignedTo:x[5],due:x[6]}));
+ const movements=[['Receipt','MED-001',60,'B-2411',dt(-12),'Kerala Medical Distributors'],['Issue','MED-002',12,'B-2412',dt(-6),'Sister Lissy'],['Receipt','MED-003',100,'B-2413',dt(-4),'Kerala Medical Distributors'],['Adjustment','MED-008',-15,'B-2418',dt(-2),'Physical count correction']].map((x,i)=>({id:'MOV-'+(i+1),type:x[0],item:x[1],qty:x[2],batch:x[3],date:x[4],actor:x[5]}));
+ const audit=[['Signed in','Session','Demo role: Super Administrator',dt(0)],['Approved expense','EXP-003','Dressing material ₹1,320.00',dt(-1)],['Posted voucher','VOU-1204','Vehicle service',dt(-2)],['Recorded observation','OBS-003','Patient THN-PAT-000005',dt(-3)],['Stock adjustment','MED-008','Count correction -15',dt(-4)]].map((x,i)=>({id:'AUD-'+(i+1),ts:dt(-Math.floor(i/2))+' '+(9+i)+':'+String(10+i*7).padStart(2,'0'),actor:me()[1],action:x[0],entity:x[1],detail:x[2]}));
+ return {patients,visits,observations,nurses,volunteers,donations,expenses,ledger,meds,equipment,movements,audit,set:{unit:'Central Unit',currency:'INR',lowStock:25,expiryDays:45,receiptPrefix:'RCP-'}};
+}
+let DB;
+function normalizeDB(d){
+ if(!d.nurses)d.nurses=[['Sister Lissy'],['Sister Ancy'],['Sister Sheela']].map(x=>({id:uid('THN-NUR'),name:x[0],phone:'',skills:'Clinical visits',availability:'Available'}));
+ d.volunteers.forEach(x=>{if(x.role==='Driver'){x.role='Volunteer';x.canDrive=true}});
+ const canDrive=n=>d.volunteers.some(x=>x.name===n&&(x.canDrive||/driver|car|vehicle/i.test(x.skills||'')));
+ d.visits.forEach(x=>{const team=Array.isArray(x.volunteers)?x.volunteers:[];if(x.driver&&!team.includes(x.driver))team.unshift(x.driver);x.volunteers=team;if(!x.driver&&team.length)x.driver=team.find(canDrive)||team[0]});
+ return d;
+}
+function loadDB(){try{const x=JSON.parse(localStorage.getItem(LSKEY));if(x&&x.d)return normalizeDB(x.d)}catch(e){}return seed()}
+function saveDB(){try{localStorage.setItem(LSKEY,JSON.stringify({d:DB}))}catch(e){}}
+function log(action,entity,detail){DB.audit.unshift({id:uid('AUD'),ts:dt(0)+' '+new Date().toTimeString().slice(0,5),actor:uname(),action,entity,detail})}
+function commit(msg,action,entity,detail){if(action)log(action,entity,detail);saveDB();render();toast(msg,'ok')}
+
+/* ============ UI PRIMITIVES ============ */
+const $=id=>document.getElementById(id);
+const head=(icon,title,sub,actions='')=>`<div class="pageHead"><div><h1><span class="tile ${toneForIcon(icon)}">${ic(icon)}</span>${t(title)}</h1><p>${sub}</p></div><div class="row wrap">${actions}</div></div>`;
+function toneForIcon(i){return ({dashboard:'info',patients:'ok',visits:'info',clinical:'ok',volunteers:'info',donations:'ok',expenses:'bad',finance:'info',inventory:'ok',reports:'info',admin:'bad'})[i]||'info'}
+const card=(title,body,extra='')=>`<div class="card"><h2>${title}</h2>${body}${extra}</div>`;
+const table=(cols,rows,empty='Nothing yet')=>`<div class="tw"><table><thead><tr>${cols.map(c=>typeof c==='string'?`<th>${c}</th>`:`<th class="${c[1]||''}">${c[0]}</th>`).join('')}</tr></thead><tbody>${rows||`<tr><td class="empty" colspan="${cols.length}">${empty}</td></tr>`}</tbody></table></div>`;
+const kpi=(k,label,val,sub,icon,fn='')=>`<div class="kpi ${k}" ${fn?`role="button" tabindex="0" onclick="${fn}" onkeydown="if(event.key==='Enter'){${fn}}"`:''}><div class="top"><span class="lab">${label}</span><span class="tile ${k} sm">${ic(icon)}</span></div><div class="val">${val}</div><div class="sub">${sub}</div></div>`;
+const seg=(active,items,fn)=>`<div class="seg">${items.map(x=>`<button class="${x[0]===active?'on':''}" onclick="${fn}('${x[0]}')">${x[1]}</button>`).join('')}</div>`;
+const field=(label,id,val='',type='text',extra='')=>`<div class="fld"><label for="${id}">${label}</label><input id="${id}" type="${type}" value="${esc(val)}" ${extra}></div>`;
+const selectF=(label,id,opts,val='',extra='')=>`<div class="fld"><label for="${id}">${label}</label><select id="${id}" ${extra}>${opts.map(o=>{const [a,b]=Array.isArray(o)?o:[o,o];return `<option value="${esc(a)}" ${a===val?'selected':''}>${esc(b)}</option>`}).join('')}</select></div>`;
+const multiF=(label,id,opts,val=[],extra='')=>`<div class="fld"><label for="${id}">${label}</label><select id="${id}" multiple size="${Math.min(5,Math.max(3,opts.length))}" ${extra}>${opts.map(o=>{const [a,b]=Array.isArray(o)?o:[o,o];return `<option value="${esc(a)}" ${val.includes(a)?'selected':''}>${esc(b)}</option>`}).join('')}</select></div>`;
+const areaF=(label,id,val='')=>`<div class="fld"><label for="${id}">${label}</label><textarea id="${id}">${esc(val)}</textarea></div>`;
+function need(id,label){if(!v(id).trim()){toast(label+' is required','bad');$(id)?.focus();return false}return true}
+let lastFocus=null,yesFn=null;
+function dlg(title,body,footer,icon='info',tone='info',wide=false){
+ lastFocus=document.activeElement;const r=$('dialog');
+ r.innerHTML=`<div class="backdrop" data-close="1"></div><div class="dlg ${wide?'wide':''}" role="dialog" aria-modal="true" aria-labelledby="dlgT"><div class="dlgHead"><span class="tile ${tone}">${ic(icon)}</span><div><h2 id="dlgT">${title}</h2><p>Thanal demo · sample data only</p></div><button class="iconbtn" data-close="1" aria-label="Close dialog">${ic('x')}</button></div><div class="dlgBody">${body}</div><div class="dlgFoot">${footer||'<button class="btn secondary" data-close="1">Close</button>'}</div></div>`;
+ r.classList.add('open');document.body.style.overflow='hidden';
+ requestAnimationFrame(()=>{const f=r.querySelector('.dlg input,.dlg select,.dlg textarea,.dlg .btn');if(f)f.focus()});
+}
+function closeDlg(){const r=$('dialog');if(!r.classList.contains('open'))return;r.querySelectorAll('input,select,textarea').forEach(e=>{if(e.id)LASTFORM[e.id]=e.type==='checkbox'?e.checked:e.value});r.classList.remove('open');r.innerHTML='';document.body.style.overflow='';lastFocus?.focus?.()}
+function confirmDlg(title,msg,fn,ok='Confirm',danger=true){yesFn=fn;dlg(title,`<p style="font-size:13px;line-height:1.65">${msg}</p>`,`<button class="btn secondary" data-close="1">Cancel</button><button class="btn ${danger?'danger':''}" onclick="yes()">${ok}</button>`,'alert',danger?'bad':'info')}
+function yes(){const f=yesFn;yesFn=null;closeDlg();f&&f()}
+function toast(msg,tone='info'){const e=document.createElement('div');e.className='toast '+tone;e.innerHTML=`<span class="tile ${tone} xs">${ic(tone==='ok'?'check':tone==='bad'?'alert':'info')}</span><span>${esc(msg)}</span>`;$('toasts').appendChild(e);setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.remove(),260)},3200)}
+function csv(name,headers,rows){const q=x=>`"${String(x??'').replace(/"/g,'""')}"`;const txt='\uFEFF'+[headers,...rows].map(r=>r.map(q).join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/csv;charset=utf-8'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);toast('Sample CSV exported — fictional data','info')}
+function pageIcon(m){return (NAV.find(x=>x[0]===m)||['','','dashboard'])[2]}
+/* ============ SHELL ============ */
+function renderNav(){
+ let h='',last='';
+ NAV.filter(x=>allowed(x[0])).forEach(([id,label,icon,cat])=>{if(cat!==last){h+=`<div class="navcat">${t(NAVCAT[cat])}</div>`;last=cat}
+  h+=`<button class="${S.tab===id?'on':''}" onclick="go('${id}')"><span class="navico">${ic(icon)}</span><span>${t(label)}</span></button>`});
+ $('nav').innerHTML=h;
+}
+function renderTop(){
+ $('ttl').textContent=t((NAV.find(x=>x[0]===S.tab)||[])[1]||'Dashboard');
+ $('roleSel').innerHTML=ROLES.map(r=>`<option value="${r[0]}" ${r[0]===S.role?'selected':''}>${r[1]}</option>`).join('');
+ $('langBtn').textContent=S.lang==='en'?'EN':'മല';
+ $('themeBtn').innerHTML=ic(document.documentElement.dataset.theme==='dark'?'sun':'moon');
+ $('who').innerHTML=`<span class="tile info xs" style="font-size:10px">${esc(me()[1].slice(0,2).toUpperCase())}</span><span>${esc(me()[1])}</span>`;
+ $('bellDot').innerHTML=alerts().length?`<span class="bdg bad" style="position:absolute;top:-4px;right:-4px;padding:0 5px">${alerts().length}</span>`:'';
+ $('bannerTxt').textContent=S.lang==='ml'?'ഡെമോ – സാമ്പിൾ ഡാറ്റ മാത്രം · യഥാർത്ഥ രോഗി അല്ലെങ്കിൽ സാമ്പത്തിക ഡാറ്റ ഇല്ല':'DEMO – SAMPLE DATA ONLY · Fictional patients, donors and records · Not a clinical or accounting system';
+}
+function render(){if(!allowed(S.tab))S.tab='dashboard';renderNav();renderTop();const v=VIEWS[S.tab]||VIEWS.dashboard;$('main').innerHTML=v();$('sr').classList.remove('open')}
+function go(tab,sub){S.tab=tab;if(sub)S.sub[tab]=sub;S.q='';document.body.classList.remove('navOpen');render();window.scrollTo(0,0);$('main')?.focus()}
+function switchRole(r){S.role=r;savePrefs();if(!allowed(S.tab))S.tab='dashboard';render();toast('Demo role: '+uname(),'info')}
+function doSignOut(){S.signed=false;try{localStorage.removeItem('thanal_session')}catch(e){}document.body.classList.remove('in')}
+function signIn(r){S.role=r;S.signed=true;savePrefs();try{localStorage.setItem('thanal_session','1')}catch(e){}document.body.classList.add('in');render();toast('Signed in as '+uname(),'ok')}
+function tglNav(){document.body.classList.toggle('navOpen')}
+function tglLang(){S.lang=S.lang==='en'?'ml':'en';savePrefs();render();toast(S.lang==='ml'?'ഭാഷ: മലയാളം':'Language: English','info')}
+function applyTheme(x){document.documentElement.dataset.theme=x;savePrefs();renderTop()}
+function tglTheme(){applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark')}
+function savePrefs(){try{localStorage.setItem('thanal_prefs',JSON.stringify({lang:S.lang,theme:document.documentElement.dataset.theme,role:S.role}))}catch(e){}}
+function initPrefs(){try{const p=JSON.parse(localStorage.getItem('thanal_prefs')||'{}');if(p.lang)S.lang=p.lang;if(p.role&&ROLES.some(r=>r[0]===p.role))S.role=p.role;document.documentElement.dataset.theme=p.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')}catch(e){document.documentElement.dataset.theme='light'}}
+/* ============ SEARCH & ALERTS ============ */
+function gSearch(q){const r=$('sr');q=(q||'').trim().toLowerCase();if(!q){r.classList.remove('open');r.innerHTML='';return}
+ const out=[];
+ DB.patients.filter(p=>p.name.toLowerCase().includes(q)||p.id.toLowerCase().includes(q)).slice(0,5).forEach(p=>out.push(['users','ok',p.name,p.id+' · '+p.locality,`openPatient('${p.id}')`]));
+ DB.visits.filter(v=>v.patientId.toLowerCase().includes(q)||v.id.toLowerCase().includes(q)||v.date.includes(q)).slice(0,4).forEach(v=>out.push(['calendar','info',byId(DB.patients,v.patientId)?.name||v.id,v.date+' '+v.time+' · '+v.status,`openVisit('${v.id}')`]));
+ DB.donations.filter(d=>d.donor.toLowerCase().includes(q)||d.receipt.toLowerCase().includes(q)).slice(0,3).forEach(d=>out.push(['handCoins','ok',d.donor,d.receipt+' · '+money(d.amount),`receiptDlg('${d.id}')`]));
+ DB.expenses.filter(e=>e.description.toLowerCase().includes(q)||e.id.toLowerCase().includes(q)).slice(0,3).forEach(e=>out.push(['receipt','bad',e.description,e.id+' · '+money(e.amount),`go('expenses')`]));
+ r.innerHTML=out.length?out.map(x=>`<button onclick="${x[4]}"><span class="tile ${x[1]} xs">${ic(x[0])}</span><span><b>${esc(x[2])}</b><br><span class="muted tiny">${esc(x[3])}</span></span></button>`).join(''):'<div class="tiny muted" style="padding:10px">No matches in sample data</div>';r.classList.add('open')}
+function alerts(){const a=[];
+ DB.meds.forEach(m=>{const d=daysTo(m.expiry);
+  if(d<0)a.push({t:'bad',i:'alert',n:'Expired medicine — '+m.name,s:'Batch '+m.batch+' expired '+Math.abs(d)+' days ago',f:"go('inventory','meds')"});
+  else if(d<=45)a.push({t:'info',i:'clock',n:'Near expiry — '+m.name,s:'Expires in '+d+' days · batch '+m.batch,f:"go('inventory','meds')"});
+  if(m.qty<=m.min)a.push({t:'bad',i:'bag',n:'Low stock — '+m.name,s:'Only '+m.qty+' '+m.unit+' left (min '+m.min+')',f:"go('inventory','meds')"})});
+ DB.visits.filter(v=>v.status==='Overdue').forEach(v=>a.push({t:'bad',i:'calendar',n:'Overdue visit — '+(byId(DB.patients,v.patientId)?.name||''),s:v.date+' '+v.time+' · '+v.purpose,f:"openVisit('"+v.id+"')"}));
+ DB.expenses.filter(e=>e.status==='Submitted'||e.status==='Under review').forEach(e=>a.push({t:'info',i:'receipt',n:'Claim awaiting review — '+e.submitter,s:e.id+' · '+money(e.amount)+' · '+e.description,f:"go('expenses','queue')"}));
+ return a.slice(0,12)}
+function openAlerts(){const a=alerts();dlg('Alerts & attention',a.length?a.map(x=>`<div class="alert ${x.t}" role="button" tabindex="0" onclick="closeDlg();${x.f}" onkeydown="if(event.key==='Enter'){closeDlg();${x.f}}"><span class="tile ${x.t}">${ic(x.i)}</span><div><b>${esc(x.n)}</b><span>${esc(x.s)}</span></div></div>`).join(''):'<p class="muted">No alerts in the sample dataset.</p>',`<button class="btn secondary" data-close="1">Close</button><button class="btn" onclick="closeDlg();go('reports')">${t('Export')} report</button>`,'alert','bad')}
+document.addEventListener('click',e=>{const d=$('dialog');if(d.classList.contains('open')&&e.target.dataset.close)closeDlg();if(!e.target.closest('.searchbox')&&!e.target.closest('#sr'))$('sr').classList.remove('open')});
+document.addEventListener('keydown',e=>{const d=$('dialog');if(!d.classList.contains('open'))return;
+ if(e.key==='Escape'){e.preventDefault();if(yesFn){yesFn=null}closeDlg();return}
+ if(e.key==='Tab'){const f=[...d.querySelectorAll('.dlg button,.dlg input,.dlg select,.dlg textarea')].filter(x=>!x.disabled);if(!f.length)return;const i=f.indexOf(document.activeElement);if(e.shiftKey&&i<=0){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&i===f.length-1){e.preventDefault();f[0].focus()}}});
+
+/* ============ DASHBOARD ============ */
+function auditRoute(entity){
+ const e=String(entity||'');
+ if(e.startsWith('THN-PAT'))return `openPatient('${e}')`;
+ if(e.startsWith('VIS-'))return `openVisit('${e}')`;
+ if(e.startsWith('DON-')||e.startsWith('RCP-'))return `go('donations')`;
+ if(e.startsWith('VOU-'))return `go('finance')`;
+ if(e.startsWith('EXP-'))return `go('expenses','queue')`;
+ if(e.startsWith('OBS-')||e.startsWith('AMD-'))return `go('clinical')`;
+ if(e.startsWith('MED-')||e.startsWith('EQ-')||e.startsWith('MOV-'))return `go('inventory')`;
+ return allowed('admin')?`go('admin','audit')`:`go('reports')`;
+}
+function dashboardView(){
+ const active=DB.patients.filter(p=>p.status==='Active').length;
+ const todayVisits=DB.visits.filter(v=>v.date===TODAY);
+ const pending=DB.expenses.filter(e=>e.status==='Submitted'||e.status==='Under review').length;
+ const stock=DB.meds.filter(m=>m.qty<=m.min||daysTo(m.expiry)<0).length;
+ const a=alerts().slice(0,5);
+ const counts=WEEK.map(d=>DB.visits.filter(v=>v.date===d&&v.status!=='Cancelled').length);const mx=Math.max(...counts,1);
+ const quick=[['patients','Add patient','patients',"go('patients');patientForm()",'patients'],['visits','Add visit','calendar',"go('visits');visitForm()",'schedule'],['clinical','Record observation','stethoscope',"go('clinical');obsForm()",'observe'],['expenses','Submit expense','receipt',"go('expenses');expenseForm()",'expense'],['donations','Add donation','handCoins',"go('donations');donationForm()",'donation'],['reports','Reports','chart',"go('reports')",'view']].filter(x=>can(x[4]));
+ const auditLink=allowed('admin')?"go('admin','audit')":"go('reports')";
+ return head('dashboard','Dashboard','One page for the whole unit — patients, visits, cash, stock and what needs attention today.')+
+ `<div class="kpis">${kpi('ok','Active patients',active,DB.patients.length+' registered','users',"go('patients')")}${kpi('info',"Today's visits",todayVisits.length,DB.visits.filter(v=>WEEK.includes(v.date)).length+' this week','calendar',"go('visits')")}${kpi('bad','Claims pending',pending,'Awaiting verification','receipt',"go('expenses','queue')")}${kpi('bad','Stock alerts',stock,'Expired or low stock','pills',"go('inventory','meds')")}</div>
+ <div class="card"><h2>Quick actions</h2><div class="row wrap">${quick.map(x=>`<button class="btn secondary sm" onclick="${x[3]}">${ic(x[2])} ${t(x[1])}</button>`).join('')}</div></div>
+ <div class="homegrid">
+  <div class="card"><h2>Needs attention</h2>${a.length?a.map(x=>`<div class="alert ${x.t}" role="button" tabindex="0" onclick="${x.f}" onkeydown="if(event.key==='Enter'){${x.f}}"><span class="tile ${x.t}">${ic(x.i)}</span><div><b>${esc(x.n)}</b><span>${esc(x.s)}</span></div></div>`).join(''):'<p class="muted">All clear in the sample data.</p>'}</div>
+  <div class="card"><h2>Visits this week</h2><div class="chart">${counts.map((c,i)=>`<div class="bar ${c?'':'zer'}" role="button" tabindex="0" title="${WD[i]} · ${c} visits — open visits" style="height:${c?Math.max(8,Math.round(c/mx*100)):5}%" data-t="${WD[i]} · ${c} visits" onclick="go('visits')" onkeydown="if(event.key==='Enter')go('visits')"></div>`).join('')}</div><div class="axis">${WD.map(d=>`<span>${d}</span>`).join('')}</div></div>
+ </div>
+ <div class="card"><h2>Recent activity</h2>${table(['Time','Actor','Action','Record','Detail'],DB.audit.slice(0,5).map(x=>`<tr role="button" tabindex="0" title="Open record" onclick="${auditRoute(x.entity)}" onkeydown="if(event.key==='Enter'){${auditRoute(x.entity)}}"><td>${esc(x.ts)}</td><td>${esc(x.actor)}</td><td>${esc(x.action)}</td><td><b>${esc(x.entity)}</b></td><td>${esc(x.detail)}</td></tr>`).join(''))}<div style="text-align:right;margin-top:6px"><button class="btn ghost sm" onclick="${auditLink}">View all activity →</button></div></div>`}
+
+/* ============ PATIENTS ============ */
+function patientForm(){dlg('Register patient',`<div class="notice">Unique patient IDs are assigned automatically. Check for duplicates by name, date of birth and phone before saving.</div><div class="formgrid">
+ ${field('Full name','pn')}${field('Age','pa','','number','min="0" max="120"')}${selectF('Gender','pg',[['F','Female'],['M','Male'],['O','Other']])}
+ ${field('Phone','pph','','tel')}${field('Locality','pl')}${field('Registration date','prd',TODAY,'date')}
+ ${field('Primary diagnosis','pdx')}${selectF('Status','pst',['Active','On hold','Discharged'])}${selectF('Priority','prk',['Normal','High'])}
+ ${areaF('Address / care notes','paddr')}</div>`,`<button class="btn secondary" data-close="1">Cancel</button><button class="btn" onclick="savePatient()">${t('Save')} patient</button>`,'users','ok')}
+function savePatient(){if(!need('pn','Name')||!need('pph','Phone'))return;const id='THN-PAT-'+String(DB.patients.length+1).padStart(6,'0');
+ DB.patients.unshift({id,name:v('pn'),age:num('pa'),gender:v('pg'),phone:v('pph'),locality:v('pl')||'—',dx:v('pdx')||'Not specified',status:v('pst'),risk:v('prk'),doctor:'Dr. R. Menon',nurse:'Sister Lissy',registered:v('prd')||TODAY,caretaker:'Family member',address:v('paddr')});
+ closeDlg();commit('Patient '+id+' registered','Registered patient',id,v('pn'))}
+function openPatient(id){const p=byId(DB.patients,id);if(!p)return;const vs=DB.visits.filter(x=>x.patientId===id),ob=DB.observations.filter(x=>x.patientId===id);
+ const timeline=[...vs.map(x=>({d:x.date,t:'Visit · '+x.status,s:x.time+' · '+x.purpose,tone:tone(x.status),ic:'calendar'})),...ob.map(x=>({d:x.date,t:'Observation by '+x.author,s:x.bp+' mmHg · pain '+x.pain+'/10',tone:'ok',ic:'activity'}))].sort((a,b)=>b.d.localeCompare(a.d));
+ dlg(p.name,`<div class="kv"><div><small>Patient ID</small><b>${esc(p.id)}</b></div><div><small>Status</small><b>${badge(p.status)} ${badge(p.risk==='High'?'High priority':'Low risk')}</b></div><div><small>Age / gender</small><b>${p.age} · ${p.gender}</b></div><div><small>Phone</small><b>${esc(p.phone)}</b></div><div><small>Locality</small><b>${esc(p.locality)}</b></div><div><small>Assigned</small><b>${esc(p.nurse)}</b></div></div>
+ <div class="notice" style="margin-top:12px"><b>Care plan:</b> ${esc(p.dx)} · Doctor: ${esc(p.doctor)} · Registered ${p.registered}</div>
+ <h2 style="margin:14px 0 8px">Clinical timeline</h2>${timeline.length?timeline.slice(0,12).map(x=>`<div class="alert ${x.tone}"><span class="tile ${x.tone}">${ic(x.ic)}</span><div><b>${esc(x.t)}</b><span>${x.d} · ${esc(x.s)}</span></div></div>`).join(''):'<p class="muted">No visits or observations yet.</p>'}`,
+ `<button class="btn secondary" data-close="1">Close</button>${can('observe')?`<button class="btn" onclick="closeDlg();go('clinical');setTimeout(()=>{const e=$('op');if(e)e.value='${p.id}'},50)">Add observation</button>`:''}`,'users','ok',true)}
+function patientsView(){const q=S.q.toLowerCase();const rows=DB.patients.filter(p=>!q||[p.name,p.id,p.locality,p.phone,p.dx].some(x=>String(x).toLowerCase().includes(q))).map(p=>`<tr style="cursor:pointer" onclick="openPatient('${p.id}')"><td><b>${esc(p.name)}</b><br><span class="tiny muted">${p.id}</span></td><td>${p.age} · ${p.gender}</td><td>${esc(p.locality)}</td><td>${esc(p.dx)}</td><td>${badge(p.status)}</td><td>${p.risk==='High'?badge('High priority'):'<span class="muted">Normal</span>'}</td><td>${esc(p.nurse)}</td><td>${p.registered}</td></tr>`).join('');
+ return head('patients','Patients','Register patients, review care history and follow the chronological patient timeline.',can('patients')?`<button class="btn" onclick="patientForm()">${ic('plus')} ${t('Add patient')}</button>`:'')+
+ card(`Patient directory · ${DB.patients.length} records`,`<div class="toolbar"><input placeholder="${t('Search')} patients…" value="${esc(S.q)}" oninput="S.q=this.value;render()"></div>`+table(['Patient','Age','Locality','Diagnosis','Status','Priority','Nurse','Registered'],rows,'No patients match this search'))}
+
+/* ============ VISITS ============ */
+const driverMembers=()=>DB.volunteers.filter(x=>x.canDrive||/driver|car|vehicle/i.test(x.skills||''));
+const visitsOn=d=>DB.visits.filter(x=>x.date===d).sort((a,b)=>a.time.localeCompare(b.time));
+const vpatient=x=>byId(DB.patients,x.patientId)?.name||x.patientId;
+const driverOf=x=>x.driver||(Array.isArray(x.volunteers)?x.volunteers[0]:'')||'';
+function visitTeamCard(x){
+ if(!x)return '';
+ const p=byId(DB.patients,x.patientId),drv=driverOf(x);
+ const team=Array.isArray(x.volunteers)?[...x.volunteers]:[];
+ if(drv&&!team.includes(drv))team.unshift(drv);
+ return `<div class="row wrap" style="margin-bottom:10px">${badge(x.status)} ${badge(x.priority)}</div>
+ <div class="teamBlock"><small>Patient · ${esc(x.id)}</small><div class="rowline"><span class="tile ok xs">${ic('users')}</span><b>${esc(p?.name||x.patientId)}</b></div><div class="tiny muted">${esc(p?.locality||'')} · ${x.date} · ${x.time}</div></div>
+ <div class="teamBlock"><small>Nurse going for visit</small><div class="rowline"><span class="tile ok xs">${ic('activity')}</span><b>${esc(x.nurse||'Not assigned')}</b></div></div>
+ <div class="teamBlock"><small>Volunteer driving the car</small><div class="rowline"><span class="tile ok xs">${ic('car')}</span><b>${esc(drv||'Not assigned')}</b>${drv?' <span class="bdg ok">Volunteer · driver</span>':''}</div></div>
+ <div class="teamBlock"><small>Volunteers assigned (${team.length})</small>${team.map(n=>`<span class="personChip ${n===drv?'driver':''}">${ic(n===drv?'car':'user')} ${esc(n)}</span>`).join('')||'<span class="tiny muted">Not assigned</span>'}<div class="tiny muted" style="margin-top:7px">Members and volunteers are the same group.</div>${x.notes?`<div class="tiny muted" style="margin-top:5px">${esc(x.notes)}</div>`:''}</div>`;
+}
+function visitForm(date=CAL.day){const nurses=(DB.nurses||[]).map(x=>x.name),members=DB.volunteers.map(x=>[x.name,x.name+(x.canDrive?' · car driver':'')]),drivers=driverMembers().map(x=>[x.name,x.name+' · car']);
+ dlg('Schedule visit',`<div class="notice">${ic('info')} Members are volunteers. Choose the nurse, the volunteer team and the volunteer who will drive the car. The driver is added to the team automatically.</div><div class="formgrid">
+ ${selectF('Patient','vp',DB.patients.map(p=>[p.id,p.name+' · '+p.id]))}${field('Date','vd',date||TODAY,'date')}${field('Time','vt','09:30','time')}
+ ${field('Purpose','vpu','Routine home visit')}${selectF('Priority','vpri',['Normal','High'])}${selectF('Status','vst',['Planned','In progress','Completed','Overdue','Cancelled'])}
+ ${selectF('Nurse going for visit','vn',nurses.length?nurses:['Sister Lissy'])}${multiF('Volunteers / members assigned','vvols',members)}
+ ${selectF('Volunteer driving the car','vdr',drivers.length?drivers:[['','No driver available']])}</div>${areaF('Special instructions','vnotes')}`,
+ `<button class="btn secondary" data-close="1">Cancel</button><button class="btn" onclick="saveVisit()">Schedule visit</button>`,'calendar','info',true)}
+function saveVisit(){const date=v('vd'),time=v('vt')||'09:30';if(!date){toast('Date is required','bad');return}
+ const team=vals('vvols');if(!team.length){toast('Select at least one volunteer / member','bad');return}
+ let driver=v('vdr');if(!driver)driver=team.find(n=>driverMembers().some(x=>x.name===n))||team[0];
+ if(!team.includes(driver))team.unshift(driver);
+ const id=uid('VIS');
+ DB.visits.push({id,patientId:v('vp'),date,time,purpose:v('vpu')||'Home visit',priority:v('vpri')||'Normal',status:v('vst')||'Planned',nurse:v('vn')||'Sister Lissy',volunteers:team,driver,notes:v('vnotes'),outcome:''});
+ CAL.day=date;CAL.cursor=date.slice(0,7)+'-01';CAL.selected=id;S.sub.visits='day';
+ closeDlg();commit('Visit scheduled','Scheduled visit',id,date+' '+time+' · '+driver+' driving')}
+function openVisit(id){const x=byId(DB.visits,id);if(!x)return;
+ dlg('Visit '+x.id+' · '+x.date+' '+x.time,`<div class="notice">${ic('info')} Daily activity for this visit — nurse, volunteer team and the volunteer driving the car.</div>${visitTeamCard(x)}${x.outcome?`<div class="notice"><b>Outcome:</b> ${esc(x.outcome)}</div>`:''}`,
+ `<button class="btn secondary" data-close="1">Close</button>${can('visit')||can('schedule')?`<button class="btn secondary" onclick="closeDlg();setVisitStatus('${id}','Cancelled')">Cancel visit</button><button class="btn" onclick="closeDlg();setVisitStatus('${id}','Completed')">Mark completed</button>`:''}`,'calendar','info',true)}
+function setVisitStatus(id,st){const x=byId(DB.visits,id);if(!x)return;x.status=st;if(st==='Completed')x.outcome='Observations recorded; care continued';commit('Visit '+id+' marked '+st,'Updated visit',id,st)}
+function calToolbar(title){const view=S.sub.visits||'month';return `<div class="calbar"><h2>${title}</h2><button class="calToday" onclick="calToday()">Today</button><div class="calnav"><button onclick="calShift(-1)" aria-label="Previous">${ic('chevronLeft')}</button><button onclick="calShift(1)" aria-label="Next">${ic('chevronRight')}</button></div>${seg(view,[['month','Month'],['day','Day'],['list','List']],'setSub')}</div>`}
+function monthCalendar(){const start=mondayOf(CAL.cursor);const cells=Array.from({length:42},(_,i)=>addDays(start,i));
+ const body=cells.map(d=>{const list=visitsOn(d),out=d.slice(0,7)!==CAL.cursor.slice(0,7);
+  return `<div class="monthCell ${out?'out':''} ${d===TODAY?'today':''} ${d===CAL.day?'sel':''}" onclick="calGoDay('${d}')" title="Open ${d}"><div class="monthNum">${Number(d.slice(8))}</div>
+  ${list.slice(0,3).map(x=>`<button class="eventChip ${tone(x.status)} ${x.id===CAL.selected?'on':''}" onclick="event.stopPropagation();calFocusVisit('${x.id}')"><b>${x.time}</b> ${esc(vpatient(x))}</button>`).join('')}
+  ${list.length>3?`<button class="eventMore" onclick="event.stopPropagation();calGoDay('${d}')">+${list.length-3} more</button>`:''}</div>`}).join('');
+ return `<div class="calShell">${calToolbar(monthName(CAL.cursor))}<div class="calScroll"><div class="monthGrid">${WD.map(x=>`<div class="monthHead">${x}</div>`).join('')}${body}</div></div></div>`}
+function dayCalendar(){const list=visitsOn(CAL.day);
+ if(CAL.selected&&!list.some(x=>x.id===CAL.selected))CAL.selected=list[0]?.id||'';
+ const sel=byId(DB.visits,CAL.selected)||list[0]||null;if(sel&&!CAL.selected)CAL.selected=sel.id;
+ const activity=list.length?list.map(x=>`<button class="activityRow ${tone(x.status)} ${sel&&sel.id===x.id?'on':''}" onclick="calSelectVisit('${x.id}')"><span class="at">${x.time}</span><span><b class="an">${esc(vpatient(x))}</b><span class="as">${esc(x.purpose)} · Nurse ${esc(x.nurse)} · Driver ${esc(driverOf(x))}</span></span></button>`).join(''):'<p class="muted">No visits scheduled on this day.</p>';
+ const minH=Math.min(8,...list.map(x=>Number(x.time.slice(0,2))||8)),maxH=Math.max(18,...list.map(x=>(Number(x.time.slice(0,2))||8)+1));
+ const rows=Array.from({length:maxH-minH},(_,i)=>`<div class="timeRow"><div class="timeLabel">${String(minH+i).padStart(2,'0')}:00</div><div class="timeSlot ${CAL.day===TODAY&&minH+i===new Date().getHours()?'now':''}"></div></div>`).join('');
+ const events=list.map(x=>{const [hh,mm]=x.time.split(':').map(Number),top=(hh-minH)*52+(mm/60)*52+4;return `<button class="dayEvent ${tone(x.status)} ${sel&&sel.id===x.id?'on':''}" style="top:${top}px" onclick="calSelectVisit('${x.id}')"><b>${x.time} · ${esc(vpatient(x))}</b><span>${esc(x.purpose)} · Nurse ${esc(x.nurse)} · Driver ${esc(driverOf(x))}</span></button>`}).join('');
+ let nowLine='';if(CAL.day===TODAY){const n=new Date(),top=(n.getHours()-minH)*52+(n.getMinutes()/60)*52;if(top>=0&&top<=(maxH-minH)*52)nowLine=`<div class="nowLine" style="top:${top}px"></div>`}
+ const panel=sel?visitTeamCard(sel):'<p class="muted">Click a visit in Daily activity to see who is going.</p>';
+ const add=(can('schedule')||can('visit'))?`<button class="btn sm" onclick="visitForm('${CAL.day}')">${ic('plus')} Add visit</button>`:'';
+ return `<div class="calShell">${calToolbar(longDate(CAL.day))}<div style="padding:12px"><div class="dayLayout"><div class="dayMain">
+ ${card('Daily activity · '+list.length+' visit'+(list.length===1?'':'s'),activity)}
+ ${card('Time grid',`<div class="timeGrid">${rows}${events}${nowLine}</div>`)}
+ </div><div class="card teamPanel"><h2>Visit team${sel?' · '+sel.id:''}</h2>${panel}<div class="row wrap" style="margin-top:10px">${sel?`<button class="btn secondary sm" onclick="openVisit('${sel.id}')">Full details</button>`:''}${add}</div></div></div></div></div>`}
+function listCalendar(){const q=S.q.toLowerCase();const list=DB.visits.filter(x=>!q||[x.id,vpatient(x),x.purpose,x.date,x.nurse,driverOf(x),...(x.volunteers||[])].some(y=>String(y).toLowerCase().includes(q))).sort((a,b)=>b.date.localeCompare(a.date)||a.time.localeCompare(b.time));
+ const rows=list.map(x=>`<tr role="button" tabindex="0" onclick="openVisit('${x.id}')" onkeydown="if(event.key==='Enter')openVisit('${x.id}')"><td>${x.id}</td><td><b>${esc(vpatient(x))}</b></td><td>${x.date}</td><td>${x.time}</td><td>${esc(x.purpose)}</td><td>${esc(x.nurse)}</td><td>${esc((x.volunteers||[]).join(', '))}</td><td><b>${esc(driverOf(x))}</b></td><td>${badge(x.status)}</td></tr>`).join('');
+ return `<div class="calShell">${calToolbar('All scheduled visits')}<div style="padding:12px"><div class="toolbar"><input placeholder="Search visits…" value="${esc(S.q)}" oninput="S.q=this.value;render()"></div>${table(['ID','Patient','Date','Time','Purpose','Nurse','Volunteer team','Driver','Status'],rows,'No visits match this search')}</div></div>`}
+function visitsView(){let view=S.sub.visits||'month';if(view==='calendar')view='month';S.sub.visits=view;
+ const add=(can('schedule')||can('visit'))?`<button class="btn" onclick="visitForm()">${ic('plus')} Add visit</button>`:'';
+ const body=view==='list'?listCalendar():view==='day'?dayCalendar():monthCalendar();
+ return head('visits','Visits','Google Calendar-style monthly and daily visits — click a visit to see the nurse and volunteer team.',add)+body}
+function calShift(n){if(S.sub.visits==='day'){CAL.day=addDays(CAL.day,n);CAL.cursor=CAL.day.slice(0,7)+'-01';CAL.selected=(visitsOn(CAL.day)[0]||{}).id||''}else{CAL.cursor=addMonths(CAL.cursor,n)}render()}
+function calToday(){CAL.day=TODAY;CAL.cursor=TODAY.slice(0,7)+'-01';CAL.selected=(visitsOn(TODAY)[0]||{}).id||'';render()}
+function calGoDay(d){CAL.day=d;CAL.cursor=d.slice(0,7)+'-01';CAL.selected=(visitsOn(d)[0]||{}).id||'';S.sub.visits='day';render()}
+function calFocusVisit(id){const x=byId(DB.visits,id);if(!x)return;CAL.day=x.date;CAL.cursor=x.date.slice(0,7)+'-01';CAL.selected=id;S.sub.visits='day';render()}
+function calSelectVisit(id){CAL.selected=id;render();setTimeout(()=>{const e=document.querySelector('.dayEvent.on');if(e)e.scrollIntoView({block:'nearest',behavior:'smooth'})},0)}
+function setSub(x){S.sub[S.tab]=x==='calendar'?'month':x;if(S.tab==='visits'){const f=visitsOn(CAL.day)[0];if(f&&!CAL.selected)CAL.selected=f.id}S.q='';render()}
+
+/* ============ CLINICAL ============ */
+function obsForm(){dlg('Record observation',`<div class="notice">${ic('lock')} Clinical entries are write-once. Corrections create a linked amendment with author, timestamp and reason.</div><div class="formgrid">
+ ${selectF('Patient','op',DB.patients.map(p=>[p.id,p.name+' · '+p.id]))}
+ ${selectF('Linked visit','ovid',[['','No linked visit'],...DB.visits.map(v=>[v.id,v.id+' · '+v.date])])}
+ ${field('Blood pressure','obp','120/80')}${field('Pulse / min','opul','72','number')}${field('Temperature °C','otemp','36.8','number','step="0.1"')}
+ ${field('SpO₂ %','osp','98','number')}${field('Pain score (0–10)','opain','2','number','min="0" max="10"')}${field('Date','odate',TODAY,'date')}
+ ${selectF('Recorded by','oauthor',[me()[1],'Sister Lissy','Sister Ancy','Dr. R. Menon'])}</div>${areaF('General condition & notes','onotes')}`,
+ `<button class="btn secondary" data-close="1">Cancel</button><button class="btn" onclick="saveObs()">Save observation</button>`,'stethoscope','ok')}
+function saveObs(){if(!v('op')){toast('Select a patient','bad');return}
+ const id='OBS-'+String(DB.observations.length+1).padStart(3,'0');
+ DB.observations.unshift({id,patientId:v('op'),visitId:v('ovid'),author:v('oauthor'),date:v('odate')||TODAY,bp:v('obp'),pulse:v('opul'),temp:v('otemp'),spo2:v('osp'),pain:v('opain'),notes:v('onotes'),amended:false});
+ closeDlg();commit('Observation saved for '+byId(DB.patients,v('op'))?.name,'Recorded observation',id,'Patient '+v('op'))}
+function amendDlg(id){const x=byId(DB.observations,id);if(!x)return;dlg('Amend observation',`<p class="muted tiny">Original entry ${x.id} remains immutable. This amendment will be linked to it.</p><div class="formgrid" style="margin-top:10px">${field('Corrected blood pressure','abp',x.bp)}${field('Corrected pain score','apain',x.pain,'number')}${field('Author','aauthor',me()[1])}</div>${areaF('Reason for amendment','areason')}`,
+ `<button class="btn secondary" data-close="1">Cancel</button><button class="btn" onclick="saveAmend('${id}')">Save amendment</button>`,'file','info')}
+function saveAmend(id){if(!need('areason','Reason'))return;const x=byId(DB.observations,id);x.amended=true;x.amendReason=v('areason');x.bp=v('abp');x.pain=v('apain');
+ const nid=uid('AMD');DB.observations.unshift({id:nid,patientId:x.patientId,visitId:x.visitId,author:v('aauthor'),date:TODAY,bp:v('abp'),pulse:x.pulse,temp:x.temp,spo2:x.spo2,pain:v('apain'),notes:'Amendment of '+id+': '+v('areason'),amended:false});
+ closeDlg();commit('Amendment saved','Amended observation',nid,'Original '+id+' · '+v('areason'))}
+function clinicalView(){const rows=DB.observations.map(o=>{const p=byId(DB.patients,o.patientId);return `<tr><td>${o.date}</td><td><b>${esc(p?.name||o.patientId)}</b><br><span class="tiny muted">${o.id}</span></td><td>${esc(o.visitId||'—')}</td><td>${esc(o.bp)}</td><td>${o.pulse}</td><td>${o.temp}</td><td>${o.spo2}</td><td>${o.pain}/10</td><td>${esc(o.author)}</td><td>${o.amended?badge('On hold'):badge('Completed')}</td><td><button class="btn secondary sm" onclick="amendDlg('${o.id}')">Amend</button></td></tr>`}).join('');
+ return head('stethoscope','Clinical','Nurse observations, vitals and medication records — every entry linked to patient, visit, author and time.',can('observe')?`<button class="btn" onclick="obsForm()">${ic('plus')} Record observation</button>`:'')+
+ `<div class="notice">${ic('lock')} Previous clinical entries are immutable. Use <b>Amend</b> to create a linked correction with a reason — no original entry is overwritten.</div>`+
+ card('Observation history · '+DB.observations.length+' entries',table(['Date','Patient','Visit','BP','Pulse','Temp','SpO₂','Pain','Author','State',''],rows))}
+
+/* ============ VOLUNTEERS ============ */
+function volunteerForm(){dlg('Add volunteer / member',`<div class="notice">${ic('info')} Volunteer and member mean the same group. A volunteer may also be the car driver for home visits.</div><div class="formgrid">
+ ${field('Name','vn2')}${selectF('Group role','vtyp',[['Volunteer','Volunteer'],['Volunteer · driver','Volunteer · driver']])}${field('Phone','vph','','tel')}${selectF('Availability','vav',['Available','Unavailable'])}${field('Skills / notes','vsk')}${field('Vehicle (if driver)','vveh')}</div>`,`<button class="btn secondary" data-close="1">Cancel</button><button class="btn" onclick="saveVolunteer()">Save volunteer</button>`,'heart','info',true)}
+function saveVolunteer(){if(!need('vn2','Name'))return;const driver=v('vtyp')==='Volunteer · driver';const skills=[v('vsk'),driver?v('vveh'):''].filter(Boolean).join(' · ');DB.volunteers.push({id:uid('THN-VOL'),name:v('vn2'),role:'Volunteer',canDrive:driver,phone:v('vph'),availability:v('vav'),hours:0,skills,joined:TODAY});closeDlg();commit('Volunteer added','Added volunteer / member',v('vn2'),driver?'Volunteer · driver':'Volunteer')}
+function toggleAvail(id){const x=byId(DB.volunteers,id);x.availability=x.availability==='Available'?'Unavailable':'Available';commit('Availability updated','Updated availability',id,x.availability)}
+function volunteersView(){const q=S.q.toLowerCase();const rows=DB.volunteers.filter(x=>!q||[x.name,x.role,x.phone,x.skills,x.canDrive?'driver car vehicle':''].some(y=>String(y).toLowerCase().includes(q))).map(x=>`<tr><td><b>${esc(x.name)}</b><br><span class="tiny muted">${x.id}</span></td><td>${x.canDrive?'Volunteer · driver':'Volunteer'}</td><td>${esc(x.phone)}</td><td>${badge(x.availability)}</td><td>${x.hours} h</td><td>${esc(x.skills)}</td><td><button class="btn secondary sm" onclick="toggleAvail('${x.id}')">Toggle</button></td></tr>`).join('');
+ return head('heart','Volunteers / Members','A member of this group is called a volunteer. Volunteers may also drive the car for home visits.',`<button class="btn" onclick="volunteerForm()">${ic('plus')} Add volunteer</button>`)+
+ card('Volunteer group · '+DB.volunteers.length+' members',`<div class="notice">${ic('info')} One group, different duties — care support, logistics or driving. Nurses are shown separately on visit teams.</div><div class="toolbar"><input placeholder="Search volunteers…" value="${esc(S.q)}" oninput="S.q=this.value;render()"></div>`+table(['Name','Group role','Phone','Availability','Hours','Skills',''],rows))}
+
+/* ============ DONATIONS ============ */
+function donationForm(){dlg('Record donation',`<div class="notice">${ic('info')} Demo only — record simulated donations. Never collect real payments or publish payment links.</div><div class="formgrid">
+ ${field('Donor name','dn','')}${selectF('Type','dtype',[['Named','Named'],['Anonymous','Anonymous']])}${field('Amount (₹)','damt','','number','min="0" step="1"')}
+ ${field('Date','ddate',TODAY,'date')}${selectF('Method','dmethod',['Cash','Bank','UPI','Cheque'])}${selectF('Category','dcat',['General','Patient care','Medicines','Equipment','Recurring'])}
+ ${selectF('Restricted fund','drestr',[['No','Unrestricted'],['Yes','Restricted']])}${field('Received by','dby','Accounts Submitter')}</div>`,
+ `<button class="btn secondary" data-close="1">Cancel</button><button class="btn" onclick="saveDonation()">Record donation</button>`,'handCoins','ok')}
+function saveDonation(){if(num('damt')<=0){toast('Amount must be greater than zero','bad');return}
+ const id=uid('DON'),rcpt=DB.set.receiptPrefix+(2409+DB.donations.length);
+ DB.donations.unshift({id,donor:v('dtype')==='Anonymous'?'Anonymous':(v('dn')||'Anonymous'),anonymous:v('dtype')==='Anonymous',amount:num('damt'),method:v('dmethod'),category:v('dcat'),date:v('ddate')||TODAY,receivedBy:v('dby'),receipt:rcpt,reconciled:'Pending',restricted:v('drestr')==='Yes'});
+ closeDlg();commit('Donation '+rcpt+' recorded','Recorded donation',id,money(num('damt'))+' · '+v('dcat'))}
+function receiptDlg(id){const d=byId(DB.donations,id);if(!d)return;dlg('Donation receipt preview',`<div class="watermark" style="border:1px dashed hsl(var(--border));border-radius:10px;padding:20px">
+ <div class="row" style="justify-content:space-between"><div><b style="font-size:17px">THANAL</b><div class="tiny muted">Pain & Palliative Care Management · Registered association · Kerala</div></div><span class="bdg bad">SAMPLE</span></div>
+ <div style="margin:18px 0;border-top:1px solid hsl(var(--border))"></div>
+ <div class="kv"><div><small>Receipt no.</small><b>${esc(d.receipt)}</b></div><div><small>Date</small><b>${d.date}</b></div><div><small>Donor</small><b>${esc(d.donor)}</b></div><div><small>Method</small><b>${esc(d.method)}</b></div><div><small>Category</small><b>${esc(d.category)}</b></div><div><small>Restricted</small><b>${d.restricted?'Yes':'No'}</b></div></div>
+ <div style="margin:16px 0;padding:12px;background:hsl(var(--muted));border-radius:9px;font-size:18px;font-weight:750">${money(d.amount)}</div>
+ <p class="tiny muted">Fictional sample receipt. Not valid for tax or accounting purposes. No real payment was received.</p></div>`,
+ `<button class="btn secondary" data-close="1">Close</button><button class="btn" onclick="window.print()">${ic('print')} Print sample</button>`,'receipt','ok')}
+function donationsView(){const total=sum(DB.donations,d=>d.amount);const q=S.q.toLowerCase();
+ const rows=DB.donations.filter(d=>!q||[d.donor,d.receipt,d.category].some(x=>String(x).toLowerCase().includes(q))).map(d=>`<tr><td><b>${esc(d.receipt)}</b></td><td>${esc(d.donor)} ${d.anonymous?badge('On hold'):''}</td><td>${d.date}</td><td class="r"><b>${money(d.amount)}</b></td><td>${esc(d.method)}</td><td>${esc(d.category)}</td><td>${d.restricted?badge('In progress'):'<span class="muted">No</span>'}</td><td>${badge(d.reconciled)}</td><td><button class="btn secondary sm" onclick="receiptDlg('${d.id}')">Receipt</button></td></tr>`).join('');
+ return head('handCoins','Donations','Named and anonymous donations, receipts, categories and reconciliation status.',can('donation')?`<button class="btn" onclick="donationForm()">${ic('plus')} Add donation</button>`:'')+
+ `<div class="kpis">${kpi('ok','Total recorded',money(total),DB.donations.length+' donations','handCoins')}${kpi('info','Reconciled',DB.donations.filter(d=>d.reconciled==='Reconciled').length,'Verified against evidence','check')}${kpi('bad','Pending',DB.donations.filter(d=>d.reconciled==='Pending').length,'Awaiting reconciliation','clock')}</div>`+
+ card('Donor register',`<div class="notice">${ic('info')} Restricted donations are tracked separately against their approved purpose. No live payment channels are connected.</div><div class="toolbar"><input placeholder="Search donations…" value="${esc(S.q)}" oninput="S.q=this.value;render()"></div>`+table(['Receipt','Donor','Date','Amount','Method','Category','Restricted','Reconciled',''],rows))}
+
+/* ============ EXPENSES ============ */
+function expenseForm(){dlg('Submit expense claim',`<div class="notice">${ic('info')} Submitted claims stay pending — they do not affect the ledger until verified and posted by authorised roles.</div><div class="formgrid">
+ ${field('Submitted by','esub',uname())}${field('Date','edate',TODAY,'date')}${field('Amount (₹)','eamt','','number','min="0" step="1"')}
+ ${selectF('Category','ecat',['Transport','Medicines','Medical supplies','Maintenance','Administration','Patient support','Fuel'])}${selectF('Payment method','emethod',['Cash','Bank','UPI','Cheque'])}${field('Reference / patient (optional)','eref')}</div>${areaF('Description','edes')}
+ <p class="tiny muted">Supporting bill: sample placeholder only — no files are uploaded in this demo.</p>`,
+ `<button class="btn secondary" data-close="1">Cancel</button><button class="btn" onclick="saveExpense()">Submit claim</button>`,'receipt','bad')}
+function saveExpense(){if(num('eamt')<=0){toast('Amount must be greater than zero','bad');return}if(!need('edes','Description'))return;
+ const id=uid('EXP');DB.expenses.unshift({id,submitter:v('esub'),description:v('edes'),amount:num('eamt'),category:v('ecat'),status:'Submitted',reason:'',selfFlag:v('esub')===uname(),date:v('edate')||TODAY,method:v('emethod'),verifier:'',postedBy:''});
+ closeDlg();commit('Claim '+id+' submitted','Submitted expense',id,money(num('eamt'))+' · '+v('ecat'))}
+function verifyExpense(id){const e=byId(DB.expenses,id);if(!e)return;if(e.selfFlag||e.submitter===uname()){toast('You cannot verify or approve your own claim','bad');return}e.status='Under review';e.verifier=uname();commit('Claim under review','Verified expense',id,uname())}
+function approveExpense(id){const e=byId(DB.expenses,id);if(!e)return;if(e.selfFlag||e.submitter===uname()){toast('You cannot approve your own claim — separation of duties','bad');return}e.status='Approved';e.verifier=uname();commit('Claim approved','Approved expense',id,money(e.amount))}
+function rejectDlg(id){const e=byId(DB.expenses,id);if(!e)return;dlg('Reject claim',`<p class="tiny muted">${esc(e.id)} · ${esc(e.description)} · ${money(e.amount)}</p><div style="margin-top:10px">${areaF('Reason (retained in history)','ereason')}</div>`,`<button class="btn secondary" data-close="1">Cancel</button><button class="btn danger" onclick="rejectExpense('${id}')">Reject claim</button>`,'x','bad')}
+function rejectExpense(id){if(!need('ereason','Reason'))return;const e=byId(DB.expenses,id);e.status='Rejected';e.reason=v('ereason');e.verifier=uname();closeDlg();commit('Claim rejected','Rejected expense',id,v('ereason'))}
+function postExpense(id){const e=byId(DB.expenses,id);if(!e)return;if(e.status!=='Approved'){toast('Only approved claims can be posted','bad');return}
+ e.status='Posted';e.postedBy=uname();const vno=uid('VOU');DB.ledger.unshift({id:vno,date:TODAY,type:'Expense',particulars:e.description,account:e.category,amount:e.amount,ref:e.id,reconciled:'No'});
+ closeDlg();commit('Posted '+vno+' to ledger','Posted voucher',vno,e.id+' · '+money(e.amount))}
+function expensesView(){const sub=S.sub.expenses||'queue';const pending=DB.expenses.filter(e=>['Submitted','Under review','Approved'].includes(e.status));const posted=DB.expenses.filter(e=>e.status==='Posted'||e.status==='Rejected');
+ const row=e=>`<tr><td><b>${e.id}</b><br><span class="tiny muted">${e.date}</span></td><td>${esc(e.submitter)} ${e.selfFlag?badge('On hold'):''}</td><td>${esc(e.description)}</td><td>${esc(e.category)}</td><td class="r"><b>${money(e.amount)}</b></td><td>${badge(e.status)}</td><td>${e.reason?esc(e.reason):'—'}</td><td><div class="row">${(can('verify')||can('post')||S.role==='admin')&&!['Posted','Rejected'].includes(e.status)?
+  `<button class="btn secondary sm" onclick="verifyExpense('${e.id}')" ${e.status==='Under review'?'disabled':''}>Verify</button><button class="btn secondary sm" onclick="approveExpense('${e.id}')">Approve</button><button class="btn secondary sm" onclick="rejectDlg('${e.id}')">Reject</button>`:''}
+  ${(can('post')||S.role==='admin')&&e.status==='Approved'?`<button class="btn sm" onclick="postExpense('${e.id}')">Post</button>`:''}</div></td></tr>`;
+ return head('receipt','Expenses','Submit → verify → approve → post. Self-approval is blocked and posted corrections use reversals.',(can('expense')||S.role==='admin')?`<button class="btn" onclick="expenseForm()">${ic('plus')} Submit expense</button>`:'')+
+ `<div class="kpis">${kpi('info','Submitted',DB.expenses.filter(e=>e.status==='Submitted').length,'Awaiting verification','file')}${kpi('info','Under review',DB.expenses.filter(e=>e.status==='Under review').length,'Evidence being checked','eye')}${kpi('ok','Approved',DB.expenses.filter(e=>e.status==='Approved').length,'Ready to post','check')}${kpi('bad','Rejected',DB.expenses.filter(e=>e.status==='Rejected').length,'Reason retained','x')}</div>`+
+ card('Claims',`<div class="toolbar">${seg(sub,[['queue','Review queue'],['posted','Posted & rejected'],['all','All']],'setSub')}</div>
+ <div class="notice">${ic('lock')} A user cannot approve their own claim. The sample includes one such claim — switching to <b>Accounts Verifier</b> demonstrates the block.</div>`+
+ table(['Claim','Submitter','Description','Category','Amount','Status','Reason','Actions'],(sub==='queue'?pending:sub==='posted'?posted:DB.expenses).map(row).join('')))}
+
+/* ============ FINANCE ============ */
+function reconcileV(id){const x=byId(DB.ledger,id);x.reconciled=x.reconciled==='Reconciled'?'No':'Reconciled';commit('Reconciliation updated','Reconciled voucher',id,x.reconciled)}
+function financeView(){const inc=sum(DB.ledger.filter(x=>x.type==='Income'),x=>x.amount),exp=sum(DB.ledger.filter(x=>x.type==='Expense'),x=>x.amount);
+ const rows=DB.ledger.map(x=>`<tr><td><b>${x.id}</b></td><td>${x.date}</td><td>${x.type}</td><td>${esc(x.particulars)}</td><td>${esc(x.account)}</td><td class="r">${x.type==='Expense'?money(x.amount):'—'}</td><td class="r">${x.type==='Income'?money(x.amount):'—'}</td><td>${esc(x.ref)}</td><td>${badge(x.reconciled==='Reconciled'?'Reconciled':'Pending')}</td><td>${can('reconcile')||S.role==='admin'?`<button class="btn secondary sm" onclick="reconcileV('${x.id}')">Toggle</button>`:''}</td></tr>`).join('');
+ return head('book','Finance','Cash and bank ledger, vouchers, reconciliation and income / expenditure summaries.',`<button class="btn secondary" onclick="exportLedger()">${ic('download')} CSV</button>`)+
+ `<div class="kpis">${kpi('ok','Income',money(inc),DB.ledger.filter(x=>x.type==='Income').length+' entries','handCoins')}${kpi('bad','Expense',money(exp),DB.ledger.filter(x=>x.type==='Expense').length+' entries','receipt')}${kpi('info','Net',money(inc-exp),'Recorded movement','chart')}${kpi('warn','Unreconciled',DB.ledger.filter(x=>x.reconciled!=='Reconciled').length,'Need evidence check','clock')}</div>`+
+ card('Ledger',`<div class="notice">${ic('info')} Financial reports clearly distinguish submitted, approved, posted and reconciled values. Demo figures are fictional.</div>`+table(['Voucher','Date','Type','Particulars','Account','Debit','Credit','Ref','Reconciled',''],rows))}
+function exportLedger(){csv('thanal_sample_ledger.csv',['Voucher','Date','Type','Particulars','Account','Amount','Reference','Reconciled'],DB.ledger.map(x=>[x.id,x.date,x.type,x.particulars,x.account,x.amount,x.ref,x.reconciled]))}
+
+/* ============ INVENTORY ============ */
+function medStatus(m){const d=daysTo(m.expiry);if(d<0)return 'Expired';if(d<=DB.set.expiryDays)return 'Near expiry';if(m.qty<=m.min)return 'Low stock';return 'In stock'}
+function moveDlg(id,type){const m=byId(DB.meds,id);dlg(type+' stock — '+m.name,`<div class="formgrid">${field('Quantity','mqty','1','number','min="1"')}${field('Batch','mbatch',m.batch)}${field('Date','mdate',TODAY,'date')}${field('Actor','mactor',uname())}</div><p class="tiny muted">Stock movements are append-only; balances are recalculated from the movement log.</p>`,`<button class="btn secondary" data-close="1">Cancel</button><button class="btn" onclick="doMove('${id}','${type}')">Save movement</button>`,'pills',type==='Receipt'?'ok':'bad')}
+function doMove(id,type){const n=num('mqty');if(n<=0){toast('Quantity must be positive','bad');return}const m=byId(DB.meds,id);m.qty+=type==='Receipt'?n:-n;
+ DB.movements.unshift({id:uid('MOV'),type,batch:v('mbatch'),item:id,qty:type==='Receipt'?n:-n,date:v('mdate')||TODAY,actor:v('mactor')});
+ closeDlg();commit(type+' recorded for '+m.name,'Stock movement',id,type+' '+n+' · '+m.name)}
+function medForm(){dlg('Add medicine / batch',`<div class="formgrid">${field('Medicine name','mname')}${field('Generic name','mgen')}${field('Strength','mstrength')}${field('Batch number','mbno')}${field('Expiry date','mexp','','date')}${field('Quantity','mq2','0','number')}${field('Minimum stock','mm2','10','number')}${field('Supplier','msup','Kerala Medical Distributors')}</div>`,`<button class="btn secondary" data-close="1">Cancel</button><button class="btn" onclick="saveMed()">Save batch</button>`,'pills','ok')}
+function saveMed(){if(!need('mname','Medicine name')||!need('mexp','Expiry date'))return;const id=uid('MED');DB.meds.push({id,name:v('mname'),generic:v('mgen'),strength:v('mstrength'),batch:v('mbno'),expiry:v('mexp'),qty:num('mq2'),min:num('mm2'),unit:'units',supplier:v('msup'),movement:'Receipt'});closeDlg();commit('Batch added','Added medicine',id,v('mname'))}
+function inventoryView(){const sub=S.sub.inventory||'meds';
+ if(sub==='equipment'){const rows=DB.equipment.map(e=>{let st=e.assignedTo?(e.due<0?'Overdue':'In use'):'Available';const dueTxt=e.due<0?Math.abs(e.due)+'d overdue':'in '+e.due+'d';return `<tr><td><b>${esc(e.name)}</b></td><td>${e.assetId}</td><td>${esc(e.serial)}</td><td>${badge(e.condition)}</td><td>${esc(e.location)}</td><td>${esc(e.assignedTo||'—')}</td><td>${dueTxt}</td><td>${badge(st)}</td></tr>`}).join('');
+  return head('pills','Inventory','Medicine batches, expiry tracking and reusable medical equipment.',`<button class="btn secondary" onclick="setSub('meds')">Medicines</button>`)+
+  card('Equipment register',`<div class="toolbar">${seg(sub,[['meds','Medicines'],['equipment','Equipment'],['movements','Movements']],'setSub')}</div>`+table(['Asset','Asset ID','Serial','Condition','Location','Assigned to','Due','Status'],rows))}
+ if(sub==='movements'){const rows=DB.movements.map(m=>`<tr><td>${m.id}</td><td>${badge(m.type==='Receipt'?'Completed':m.type==='Issue'?'In progress':'On hold')}</td><td>${esc(byId(DB.meds,m.item)?.name||m.item)}</td><td class="r">${m.qty>0?'+':''}${m.qty}</td><td>${esc(m.batch)}</td><td>${m.date}</td><td>${esc(m.actor)}</td></tr>`).join('');
+  return head('pills','Inventory','Medicine batches, expiry tracking and reusable medical equipment.',`<button class="btn secondary" onclick="setSub('meds')">Medicines</button>`)+
+  card('Stock movement history',`<div class="toolbar">${seg(sub,[['meds','Medicines'],['equipment','Equipment'],['movements','Movements']],'setSub')}</div>`+table(['ID','Type','Item','Qty','Batch','Date','Actor'],rows))}
+ const rows=DB.meds.map(m=>{const st=medStatus(m),d=daysTo(m.expiry);return `<tr><td><b>${esc(m.name)}</b><br><span class="tiny muted">${esc(m.generic)} · ${esc(m.strength)}</span></td><td>${esc(m.batch)}</td><td>${m.expiry}<br><span class="tiny ${d<0?'muted':''}">${d<0?Math.abs(d)+'d ago':'in '+d+'d'}</span></td><td class="r">${m.qty}</td><td class="r">${m.min}</td><td>${badge(st)}</td><td><div class="row">${can('stock')||S.role==='admin'?`<button class="btn secondary sm" onclick="moveDlg('${m.id}','Receipt')">Receive</button><button class="btn secondary sm" onclick="moveDlg('${m.id}','Issue')">Issue</button>`:''}</div></td></tr>`}).join('');
+ return head('pills','Inventory','Medicine batches with expiry dates, minimum levels, equipment and append-only stock movements.',can('stock')?`<button class="btn" onclick="medForm()">${ic('plus')} Add batch</button>`:'')+
+ `<div class="kpis">${kpi('ok','In stock',DB.meds.filter(m=>medStatus(m)==='In stock').length,'Healthy batches','pills')}${kpi('info','Near expiry',DB.meds.filter(m=>medStatus(m)==='Near expiry').length,'Within threshold','clock')}${kpi('bad','Expired',DB.meds.filter(m=>medStatus(m)==='Expired').length,'Quarantine & write off','alert')}${kpi('bad','Low stock',DB.meds.filter(m=>medStatus(m)==='Low stock').length,'At or below minimum','bag')}</div>`+
+ card('Medicines',`<div class="toolbar">${seg(sub,[['meds','Medicines'],['equipment','Equipment'],['movements','Movements']],'setSub')}</div>`+table(['Medicine','Batch','Expiry','Qty','Min','Status',''],rows))}
+
+/* ============ REPORTS ============ */
+const REPORTS=[['Patient register','patients','Active, on hold and discharged patients'],['Visit plan','visits','Weekly visits and assignments'],['Donation register','donations','Receipts and reconciliation'],['Expense summary','expenses','Submitted to posted claims'],['Stock & expiry','inventory','Balances and expiry alerts'],['Audit log','admin','Sensitive actions and corrections']];
+function reportData(k){if(k==='patients')return [['Patient ID','Name','Age','Locality','Status','Registered'],DB.patients.map(p=>[p.id,p.name,p.age,p.locality,p.status,p.registered])];
+ if(k==='visits')return [['Visit','Patient','Date','Time','Purpose','Nurse','Status'],DB.visits.map(v=>[v.id,byId(DB.patients,v.patientId)?.name||'',v.date,v.time,v.purpose,v.nurse,v.status])];
+ if(k==='donations')return [['Receipt','Donor','Date','Amount','Method','Category','Reconciled'],DB.donations.map(d=>[d.receipt,d.donor,d.date,d.amount,d.method,d.category,d.reconciled])];
+ if(k==='expenses')return [['Claim','Submitter','Date','Amount','Category','Status','Verifier'],DB.expenses.map(e=>[e.id,e.submitter,e.date,e.amount,e.category,e.status,e.verifier])];
+ if(k==='inventory')return [['Medicine','Batch','Expiry','Qty','Min','Status'],DB.meds.map(m=>[m.name,m.batch,m.expiry,m.qty,m.min,medStatus(m)])];
+ return [['Time','Actor','Action','Entity','Detail'],DB.audit.map(a=>[a.ts,a.actor,a.action,a.entity,a.detail])]}
+function reportPreview(k,title){const d=reportData(k);dlg('Sample report — '+title,`<div class="watermark"><p class="tiny muted" style="margin-bottom:10px">Fictional data · filtered exports in production are role-controlled and logged.</p>${table(d[0],d[1].slice(0,25).map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join(''))}</div>`,`<button class="btn secondary" data-close="1">Close</button><button class="btn" onclick="csv('thanal_sample_${k}.csv',reportData('${k}')[0],reportData('${k}')[1])">${ic('download')} Export CSV</button>`,'chart','info',true)}
+function reportsView(){return head('chart','Reports','Downloadable reports with date filters. Exports contain fictional data and are watermarked.',`<button class="btn secondary" onclick="csv('thanal_sample_audit.csv',reportData('admin')[0],reportData('admin')[1])">${ic('download')} Audit CSV</button>`)+
+ card('Report catalogue',`<div class="toolbar"><input type="date" id="rf" value="${esc(S.sub.rfrom||'')}" onchange="S.sub.rfrom=this.value"><span class="muted tiny">to</span><input type="date" id="rt" value="${esc(S.sub.rto||'')}" onchange="S.sub.rto=this.value"><span class="muted tiny">${t('Search')}: ${esc(S.q||'all records')}</span></div><div class="toolbar"><input placeholder="Filter report rows…" value="${esc(S.q)}" oninput="S.q=this.value;render()"></div>
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:11px">${REPORTS.map(r=>`<div class="card tight" style="margin:0"><h2>${ic(pageIcon(r[1]))} ${r[0]}</h2><p class="tiny muted" style="min-height:32px">${r[2]}</p><div class="row" style="margin-top:10px"><button class="btn secondary sm" onclick="reportPreview('${r[1]}','${r[0]}')">${ic('eye')} Preview</button><button class="btn sm" onclick="csv('thanal_sample_${r[1]}.csv',reportData('${r[1]}')[0],reportData('${r[1]}')[1])">CSV</button></div></div>`).join('')}</div>`)}
+
+/* ============ ADMIN ============ */
+function adminView(){const sub=S.sub.admin||'users';
+ let body='';
+ if(sub==='audit'){body=card('Audit trail · append-only',table(['Time','Actor','Action','Record','Detail'],DB.audit.map(a=>`<tr><td>${esc(a.ts)}</td><td>${esc(a.actor)}</td><td>${esc(a.action)}</td><td><b>${esc(a.entity)}</b></td><td>${esc(a.detail)}</td></tr>`).join('')))}
+ else if(sub==='settings'){body=card('Unit & thresholds',`<div class="formgrid">${field('Unit name','sunit',DB.set.unit)}${selectF('Default language','slang',[['en','English'],['ml','Malayalam']],S.lang)}${field('Low-stock threshold','slow',DB.set.lowStock,'number')}${field('Near-expiry days','sexp',DB.set.expiryDays,'number')}</div><div class="row" style="margin-top:14px"><button class="btn" onclick="saveSettings()">Save settings</button><button class="btn danger" onclick="resetDlg()">Reset demo data</button></div>
+  <div class="notice" style="margin-top:14px">${ic('lock')} Production security — MFA for privileged roles, server-side role checks, encryption, audit logs and tested backups — is specified in the proposal but is deliberately not implemented in this demo.</div>`)}
+ else{body=card('Users & demo roles',table(['Name','Email','Role','Unit','MFA','Status'],ROLES.map(r=>`<tr><td><b>${esc(r[1])}</b></td><td>${esc(r[2])}</td><td>${esc(r[1])}</td><td>${esc(DB.set.unit)}</td><td>${badge(r[0]==='admin'||r[0]==='head'||r[0]==='verifier'?'Reconciled':'No')}</td><td>${S.role===r[0]?badge('Active'):'<span class="muted">Demo account</span>'}</td></tr>`).join('')))}
+ return head('settings','Administration','Users and roles, an append-only audit trail and demo settings.',`<button class="btn secondary" onclick="csv('thanal_sample_audit.csv',reportData('admin')[0],reportData('admin')[1])">${ic('download')} Audit CSV</button>`)+
+ `<div class="toolbar">${seg(sub,[['users','Users & roles'],['audit','Audit log'],['settings','Settings']],'setSub')}</div>${body}`}
+function saveSettings(){DB.set.unit=v('sunit')||DB.set.unit;DB.set.lowStock=num('slow')||DB.set.lowStock;DB.set.expiryDays=num('sexp')||DB.set.expiryDays;S.lang=v('slang');commit('Settings saved','Updated settings',DB.set.unit,'Thresholds and language updated');renderTop()}
+function resetDlg(){confirmDlg('Reset demo data','This will discard all changes in this browser and restore the original fictional sample dataset. Continue?',()=>{DB=seed();saveDB();S.sub={};S.q='';CAL.cursor=TODAY.slice(0,7)+'-01';CAL.day=TODAY;CAL.selected='';render();toast('Demo data restored','ok')},'Reset data')}
+
+/* ============ VIEWS / INIT ============ */
+const VIEWS={dashboard:dashboardView,patients:patientsView,visits:visitsView,clinical:clinicalView,volunteers:volunteersView,donations:donationsView,expenses:expensesView,finance:financeView,inventory:inventoryView,reports:reportsView,admin:adminView};
+function buildLogin(){$('lgrid').innerHTML=ROLES.map(r=>`<button class="lrole" onclick="signIn('${r[0]}')"><span class="tile ${r[0]==='admin'?'ok':r[0]==='verifier'||r[0]==='head'?'bad':'info'}">${ic(r[3])}</span><span><b>${r[1]}</b><span>${r[4]}</span></span></button>`).join('')}
+function init(){DB=loadDB();initPrefs();buildLogin();try{if(localStorage.getItem('thanal_session')){S.signed=true;document.body.classList.add('in')}}catch(e){}
+ document.addEventListener('keydown',e=>{if(e.key==='/'&&!/input|textarea|select/i.test(document.activeElement.tagName)){e.preventDefault();$('gs').focus()}});
+ render()}
+init();
+</script>
+</body>
+</html>
